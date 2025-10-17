@@ -1,0 +1,7 @@
+*idea
+*.vscode
+*.idea
+*__pycache__*
+*.pyc
+MaquinaVirtual-Grupo01
+ClinicaManager_TPG
