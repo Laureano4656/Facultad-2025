@@ -819,16 +819,18 @@ def byteArrayToStringWithParity(byte_array: bytearray) -> str:
     original_message = ""
     localByteArray = byte_array[1:]  # Excluir el byte de paridad longitudinal
     longitudinalParityByte = byte_array[0]
+    errors = 0
     # Verificar la paridad longitudinal
     for i in range(8):
-        if (longitudinalParityByte >> (7 - i)) & 1:
-            count = 0
-            for byte in localByteArray:
-                if (byte >> (7 - i)) & 1:
-                    count += 1
-            if count % 2 != 0:
-                return ""  # Si hay un error de paridad, devolver cadena vacía
-
+        count = 0
+        for byte in localByteArray:
+            if (byte >> (7 - i)) & 1:
+                count += 1
+        parity_bit = count % 2
+        if parity_bit != ((longitudinalParityByte >> (7 - i)) & 1):
+            errors += 1
+            if errors > 1:
+                return ""  # Más de un error, no se puede corregir
     for byte in localByteArray:
         if checkAsciiWithParity(byte):
             original_message += chr(byte >> 1)
@@ -838,3 +840,6 @@ def byteArrayToStringWithParity(byte_array: bytearray) -> str:
 
 msg = "Hola"
 byteArrayWithParity = stringToByteArrayWithParity(msg)
+print(f"Byte array con paridad: {byteArrayWithParity}")
+decodedMsg = byteArrayToStringWithParity(byteArrayWithParity)
+print(f"Mensaje decodificado: {decodedMsg}")
