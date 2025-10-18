@@ -551,8 +551,8 @@ def calcularTasaCompresion(mensaje: str, mensajeCodificado: bytearray) -> float:
     
     #codedSize -=  residuo  # Restar los bits de relleno
     # Calcular la tasa de compresión
-    if originalSize == 0:
-        return 0.0  # Evitar división por cero si el mensaje original está vacío
+    if codedSize == 0:
+        return 0.0  # Evitar división por cero si el mensaje codificado está vacío
     tasaCompresion = originalSize / codedSize
     
     return tasaCompresion
@@ -708,3 +708,133 @@ print(f"Mensaje: {msg2} -> Comprimido RLC en bytes: {byteArrayMsg2} -> Tasa de c
 byteArrayMsg3 = compressRLCToBytes(msg3)
 tasaCompresion3 = calcularTasaCompresion(msg3, byteArrayMsg3)
 print(f"Mensaje: {msg3} -> Comprimido RLC en bytes: {byteArrayMsg3} -> Tasa de compresión: {tasaCompresion3}")
+
+print("------------------------------------------------------")
+print("Ejercicio 21 y 22")
+'''
+Dados los siguientes codigos:
+C1 = { 00, 01, 10, 11 }
+C2 = { 000, 100, 101, 111 }
+C3 = { 0000, 0011, 1010, 0101 }
+a. Calcular la distancia de Hamming de cada código
+b. Determinar para cada código cúantos errores se pueden detectar y corregir
+'''
+def distanciaHamming(codigo: list) -> int:
+    min_distance = float('inf')
+    n = len(codigo)
+    
+    for i in range(n):
+        for j in range(i + 1, n):
+            # Calcular la distancia de Hamming entre codigo[i] y codigo[j]
+            dist = sum(c1 != c2 for c1, c2 in zip(codigo[i], codigo[j]))
+            if dist < min_distance:
+                min_distance = dist
+                
+    return min_distance
+
+def erroresDetectables(codigo: list) -> int:
+    dist = distanciaHamming(codigo)
+    # La cantidad de errores detectables es (d - 1)
+    return dist - 1
+
+def erroresCorregibles(codigo: list) -> int:
+    dist = distanciaHamming(codigo)
+    # La cantidad de errores corregibles es (d - 1) // 2
+    return (dist - 1) // 2
+codigo1 = ['00', '01', '10', '11']
+codigo2 = ['000', '100', '101', '111']
+codigo3 = ['0000', '0011', '1010', '0101']
+
+print(f"Código C1: {codigo1}")
+print(f"Distancia de Hamming C1: {distanciaHamming(codigo1)}")
+print(f"Código C1 puede detectar {erroresDetectables(codigo1)} errores y corregir {erroresCorregibles(codigo1)} errores.")
+print(f"Código C2: {codigo2}")
+print(f"Distancia de Hamming C2: {distanciaHamming(codigo2)}")
+print(f"Código C2 puede detectar {erroresDetectables(codigo2)} errores y corregir {erroresCorregibles(codigo2)} errores.")
+print(f"Código C3: {codigo3}")
+print(f"Distancia de Hamming C3: {distanciaHamming(codigo3)}")
+print(f"Código C3 puede detectar {erroresDetectables(codigo3)} errores y corregir {erroresCorregibles(codigo3)} errores.")
+
+print("------------------------------------------------------")
+
+'''
+24.Desarrollar funciones en Python que resuelvan lo siguiente:
+a. Dado un carácter, devolver un byte que represente su código ASCII (7 bits) y utilice
+el bit menos significativo para almacenar la paridad del código.
+b. Dado un byte que se obtuvo como resultado de la función anterior, verificar si es
+correcto o tiene errores
+'''
+def charToAsciiWithParity(char: str) -> int:
+    ascii_value = ord(char)  # Obtener el valor ASCII del carácter
+    parity_bit = bin(ascii_value).count('1') % 2  # Calcular el bit de paridad (paridad par)
+    ascii_with_parity = (ascii_value << 1) | parity_bit  # Desplazar y agregar el bit de paridad
+    return ascii_with_parity
+
+def checkAsciiWithParity(byte: int) -> bool:
+    ascii_value = byte >> 1  # Obtener el valor ASCII desplazando a la derecha
+    parity_bit = byte & 1  # Obtener el bit de paridad
+    # Verificar si la paridad es correcta
+    return (bin(ascii_value).count('1') % 2) == parity_bit
+
+print("Ejercicio 26")
+'''
+26. Codificar funciones en Python que resuelvan lo siguiente:
+a. Dada una cadena de caracteres, generar una secuencia de bytes (bytearray) que
+contenga su representación con código ASCII y sus bits de paridad vertical,
+longitudinal y cruzada.
+b. Dada una secuencia de bytes que se obtuvo como resultado de la función anterior,
+devolver el mensaje original o una cadena de caracteres vacía si no se pueden
+corregir los errores.
+Sugerencia: generar una matriz de bits para realizar las operaciones, transformando la
+secuencia de bytes en una lista de cadenas de caracteres binarias y, luego, cada cadena
+de caracteres en una lista de números enteros que representen los bits.
+'''
+def stringToByteArrayWithParity(s: str) -> bytearray:
+    byte_array = bytearray()
+    for char in s:
+        byte_array.append(charToAsciiWithParity(char))
+        
+    # Ahora tengo ue agregar los bits de paridad longitudinal y cruzada
+    longitud = len(byte_array)
+    parityBitsLongitudinal = []
+    for i in range(8):  # Para cada bit de los 8 bits (7 bits ASCII + 1 bit de paridad)
+        count = 0
+        for j in range(longitud):
+            if (byte_array[j] >> (7-i)) & 1:
+                count += 1
+        parity_bit = count % 2
+        parityBitsLongitudinal.append(parity_bit)  # Agregar bit de paridad longitudinal
+        
+    # 1. Combinar los 8 bits de paridad en un solo byte
+    parity_byte = 0
+    for bit in parityBitsLongitudinal:
+        parity_byte = (parity_byte << 1) | bit
+        
+    # 2. Insertar ese único byte al principio del array
+    byte_array.insert(0, parity_byte)
+
+    return byte_array
+
+def byteArrayToStringWithParity(byte_array: bytearray) -> str:
+    original_message = ""
+    localByteArray = byte_array[1:]  # Excluir el byte de paridad longitudinal
+    longitudinalParityByte = byte_array[0]
+    # Verificar la paridad longitudinal
+    for i in range(8):
+        if (longitudinalParityByte >> (7 - i)) & 1:
+            count = 0
+            for byte in localByteArray:
+                if (byte >> (7 - i)) & 1:
+                    count += 1
+            if count % 2 != 0:
+                return ""  # Si hay un error de paridad, devolver cadena vacía
+
+    for byte in localByteArray:
+        if checkAsciiWithParity(byte):
+            original_message += chr(byte >> 1)
+        else:
+            return ""  # Si hay un error de paridad, devolver cadena vacía
+    return original_message
+
+msg = "Hola"
+byteArrayWithParity = stringToByteArrayWithParity(msg)
