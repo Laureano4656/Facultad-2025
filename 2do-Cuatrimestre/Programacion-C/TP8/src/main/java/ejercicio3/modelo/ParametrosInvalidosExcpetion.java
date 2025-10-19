@@ -1,4 +1,4 @@
-package ejercicio3;
+package ejercicio3.modelo;
 
 public class ParametrosInvalidosExcpetion extends Exception
 {

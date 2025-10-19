@@ -1,6 +1,6 @@
 package ejercicio3.controlador;
 
-import ejercicio3.ParametrosInvalidosExcpetion;
+import ejercicio3.modelo.ParametrosInvalidosExcpetion;
 import ejercicio3.modelo.Tablero;
 import ejercicio3.vista.IVista;
 
@@ -30,7 +30,9 @@ public class Controlador implements ActionListener
 
     public void setVista(IVista vista)
     {
+
         this.vista = vista;
+        this.vista.setActionListener(this);
     }
 
     @Override
@@ -39,6 +41,7 @@ public class Controlador implements ActionListener
         String comando = e.getActionCommand();
         if (comando.equalsIgnoreCase("INICIAR"))
         {
+            System.out.println("Iniciando");
             try
             {
                 this.tablero = new Tablero(vista.getAlto(), vista.getAncho());
@@ -48,7 +51,20 @@ public class Controlador implements ActionListener
 
             }
             this.vista.iniciarJuego(vista.getAlto(), vista.getAncho());
-
+        } else if (comando.contains("DESCUBRIR"))
+        {
+            System.out.println("Desubiando");
+            String[] partes = comando.split("_");
+            int i = Integer.parseInt(partes[1]);
+            int j = Integer.parseInt(partes[2]);
+            if (!this.tablero.isDescubierta(i, j))
+            {
+                this.tablero.darVuelta(i, j);
+                this.vista.dibujar(tablero);
+            }
         }
+
+
+
     }
 }

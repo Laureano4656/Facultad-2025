@@ -27,20 +27,33 @@ public class Casillero
     {
         return dadoVuelta;
     }
+
     public void setDadoVuelta(boolean dadoVuelta)
     {
         this.dadoVuelta = dadoVuelta;
     }
+
     public void darVuelta()
     {
         this.dadoVuelta = true;
     }
+
     public String getTipoCarta()
     {
         return tipoCarta;
     }
+
     public void setTipoCarta(String tipoCarta)
     {
         this.tipoCarta = tipoCarta;
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Casillero casillero = (Casillero) obj;
+        return tipoCarta.equals(casillero.tipoCarta);
     }
 }

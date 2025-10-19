@@ -1,7 +1,5 @@
 package ejercicio3.modelo;
 
-import ejercicio3.ParametrosInvalidosExcpetion;
-
 
 import java.util.Set;
 

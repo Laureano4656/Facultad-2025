@@ -30,6 +30,7 @@ public class PanelConCelda extends JPanel implements ICelda
         super.paint(g);
         if (this.imagen != null)
         {
+            System.out.println("this.imagen");
             int dx = (this.getWidth() - this.imagen.getIconWidth()) / 2;
             int dy = (this.getHeight() - this.imagen.getIconHeight()) / 2;
             g.drawImage(this.imagen.getImage(), dx, dy, null);
@@ -39,12 +40,12 @@ public class PanelConCelda extends JPanel implements ICelda
     @Override
     public int getI()
     {
-        return 0;
+        return celda.getI();
     }
 
     @Override
     public int getJ()
     {
-        return 0;
+        return celda.getJ();
     }
 }

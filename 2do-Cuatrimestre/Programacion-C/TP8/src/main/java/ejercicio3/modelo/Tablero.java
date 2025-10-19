@@ -1,7 +1,5 @@
 package ejercicio3.modelo;
 
-import ejercicio3.ParametrosInvalidosExcpetion;
-
 import java.util.ArrayList;
 
 import java.util.Collections;
@@ -12,6 +10,9 @@ public class Tablero implements IMemoTest
     private static final Random r = new Random();
     private Casillero[][] casilleros;
     private ArrayList<Integer[]> posiciones;
+    private int cantidadParejas;
+
+
     public Tablero(int ancho, int alto) throws ParametrosInvalidosExcpetion
     {
         if (ancho <= 0 || alto <= 0)
@@ -25,7 +26,7 @@ public class Tablero implements IMemoTest
 
         this.casilleros = new Casillero[alto][ancho];
         this.posiciones = new ArrayList<>();
-
+        this.cantidadParejas = 0;
         ArrayList<String> tiposCartas = new ArrayList<>();
         int cantidad = (ancho * alto) / 2;
         for (int i = 1; i <= cantidad; i++) {
@@ -60,15 +61,74 @@ public class Tablero implements IMemoTest
     {
         Casillero c1 = this.casilleros[i1][j1];
         Casillero c2 = this.casilleros[i2][j2];
-        if (c1.getTipoCarta().equals(c2.getTipoCarta()))
+        if (c1.equals(c2))
         {
             c1.setDadoVuelta(true);
             c2.setDadoVuelta(true);
+            c1.setCorrecto(true);
+            c2.setCorrecto(true);
+            this.cantidadParejas = 0;
             return true;
         }
+        this.reiniciarCartasNoPareadas(i1, j1, i2, j2);
+        this.cantidadParejas = 0;
         return false;
     }
-
+    public boolean gano()
+    {
+        for (Casillero[] casillero : this.casilleros)
+        {
+            for (int j = 0; j < this.casilleros[0].length; j++)
+            {
+                if (!casillero[j].isCorrecto())
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    public void darVuelta(int i, int j)
+    {
+        if (this.cantidadParejas < 2)
+        {
+            this.casilleros[i][j].setDadoVuelta(true);
+            this.cantidadParejas++;
+        }else{
+            // debo buscar la otra carta dada vuelta
+            int iEncontrado = -1;
+            int jEncontrado = -1;
+            while (iEncontrado == -1)
+            {
+                for (int x = 0; x < this.casilleros.length; x++)
+                {
+                    for (int y = 0; y < this.casilleros[0].length; y++)
+                    {
+                        if (this.casilleros[x][y].isDadoVuelta() && !this.casilleros[x][y].isCorrecto())
+                        {
+                            iEncontrado = x;
+                            jEncontrado = y;
+                            break;
+                        }
+                    }
+                    if (iEncontrado != -1)
+                    {
+                        break;
+                    }
+                }
+            }
+            this.compararCartas(iEncontrado, jEncontrado, i, j);
+        }
+    }
+    public void reiniciarCartasNoPareadas(int i1, int j1, int i2, int j2)
+    {
+        this.casilleros[i1][j1].setDadoVuelta(false);
+        this.casilleros[i2][j2].setDadoVuelta(false);
+    }
+    public boolean isDescubierta(int i, int j)
+    {
+        return this.casilleros[i][j].isDadoVuelta();
+    }
 
     @Override
     public int getAlto()
@@ -85,6 +145,6 @@ public class Tablero implements IMemoTest
     @Override
     public boolean isDadoVuelta(int i, int j)
     {
-        return false;
+        return this.casilleros[i][j].isDadoVuelta();
     }
 }
