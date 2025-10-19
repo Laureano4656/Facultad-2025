@@ -5,4 +5,6 @@ public interface IMemoTest
     int getAlto();
     int getAncho();
     boolean isDadoVuelta(int i, int j);
+
+    void darVuelta(int i, int j);
 }

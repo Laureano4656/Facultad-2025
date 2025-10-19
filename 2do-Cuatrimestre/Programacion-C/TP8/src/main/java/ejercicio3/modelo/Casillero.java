@@ -15,7 +15,7 @@ public class Casillero
 
     public boolean isCorrecto()
     {
-        return correcto;
+        return this.correcto;
     }
 
     public void setCorrecto(boolean correcto)

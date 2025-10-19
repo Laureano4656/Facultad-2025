@@ -5,15 +5,23 @@ import javax.swing.*;
 public class Recursos
 {
     private ImageIcon imagenes[][];
-    public static final String RUTA_BASE = "/ejercicio3/recursos/64";
+    public static final String RUTA_BASE = "../recursos/64/";
 
     public Recursos(int alto,int ancho)
     {
         imagenes = new ImageIcon[alto][ancho];
         for (int i = 0; i < ancho; i++)
         {
-            for (int j = 0; j < alto; j++)
-                imagenes[i][j] = new ImageIcon(j + "_64px.png");
+            for (int j = 0; j < alto; j++){
+                imagenes[i][j] = new ImageIcon(RUTA_BASE+j + "_64px.png");
+
+            }
+        }
+        for (int i = 0; i < alto; i++)
+        {
+            for (int j = 0; j < ancho; j++){
+                System.out.println(imagenes[i][j]);
+            }
         }
     }
 

@@ -30,7 +30,6 @@ public class PanelConCelda extends JPanel implements ICelda
         super.paint(g);
         if (this.imagen != null)
         {
-            System.out.println("this.imagen");
             int dx = (this.getWidth() - this.imagen.getIconWidth()) / 2;
             int dy = (this.getHeight() - this.imagen.getIconHeight()) / 2;
             g.drawImage(this.imagen.getImage(), dx, dy, null);

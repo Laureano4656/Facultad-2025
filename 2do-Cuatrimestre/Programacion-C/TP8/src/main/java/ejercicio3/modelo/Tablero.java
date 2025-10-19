@@ -11,7 +11,8 @@ public class Tablero implements IMemoTest
     private Casillero[][] casilleros;
     private ArrayList<Integer[]> posiciones;
     private int cantidadParejas;
-
+    private int ancho;
+    private int alto;
 
     public Tablero(int ancho, int alto) throws ParametrosInvalidosExcpetion
     {
@@ -27,6 +28,8 @@ public class Tablero implements IMemoTest
         this.casilleros = new Casillero[alto][ancho];
         this.posiciones = new ArrayList<>();
         this.cantidadParejas = 0;
+        this.ancho = ancho;
+        this.alto = alto;
         ArrayList<String> tiposCartas = new ArrayList<>();
         int cantidad = (ancho * alto) / 2;
         for (int i = 1; i <= cantidad; i++) {
@@ -57,7 +60,7 @@ public class Tablero implements IMemoTest
     {
         return this.casilleros[i][j];
     }
-    public boolean compararCartas(int i1, int j1, int i2, int j2)
+    public void compararCartas(int i1, int j1, int i2, int j2)
     {
         Casillero c1 = this.casilleros[i1][j1];
         Casillero c2 = this.casilleros[i2][j2];
@@ -68,11 +71,10 @@ public class Tablero implements IMemoTest
             c1.setCorrecto(true);
             c2.setCorrecto(true);
             this.cantidadParejas = 0;
-            return true;
+            return;
         }
         this.reiniciarCartasNoPareadas(i1, j1, i2, j2);
         this.cantidadParejas = 0;
-        return false;
     }
     public boolean gano()
     {
@@ -133,13 +135,13 @@ public class Tablero implements IMemoTest
     @Override
     public int getAlto()
     {
-        return 0;
+        return this.alto;
     }
 
     @Override
     public int getAncho()
     {
-        return 0;
+        return this.ancho;
     }
 
     @Override

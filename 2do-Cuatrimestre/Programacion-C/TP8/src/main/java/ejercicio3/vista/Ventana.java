@@ -131,6 +131,9 @@ public class Ventana extends JFrame implements KeyListener, MouseListener, IVist
         this.centerPanel.setLayout(new GridLayout(alto, ancho));
         this.contentPane.add(this.centerPanel, BorderLayout.CENTER);
         this.casillas = new PanelConCelda[alto][ancho];
+
+        this.recursos = new Recursos(ancho, alto);
+
         for (int i = 0; i < alto; i++)
         {
             for (int j = 0; j < ancho; j++)
@@ -156,14 +159,13 @@ public class Ventana extends JFrame implements KeyListener, MouseListener, IVist
             {
                 if (tablero.isDadoVuelta(i, j))
                 {
-                    System.out.println(tablero.isDadoVuelta(i, j));
                     this.casillas[i][j].setBorder(new BevelBorder(BevelBorder.LOWERED));
                     ImageIcon imageIcon = this.recursos.getImagen(i, j);
                     this.casillas[i][j].setImageIcon(imageIcon);
 
                 } else
                 {
-                    this.casillas[i][j].setBorder(new EmptyBorder(5, 5, 5, 5));
+                    this.casillas[i][j].setBorder(new BevelBorder(BevelBorder.RAISED));
                     this.casillas[i][j].setImageIcon(null);
                 }
             }

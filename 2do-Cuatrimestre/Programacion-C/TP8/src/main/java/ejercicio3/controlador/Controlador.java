@@ -1,5 +1,6 @@
 package ejercicio3.controlador;
 
+import ejercicio3.modelo.IMemoTest;
 import ejercicio3.modelo.ParametrosInvalidosExcpetion;
 import ejercicio3.modelo.Tablero;
 import ejercicio3.vista.IVista;
@@ -9,11 +10,11 @@ import java.awt.event.ActionListener;
 
 public class Controlador implements ActionListener
 {
-    private Tablero tablero;
+    private IMemoTest tablero;
     private IVista vista;
 
 
-    public Tablero getTablero()
+    public IMemoTest getTablero()
     {
         return tablero;
     }
@@ -53,12 +54,15 @@ public class Controlador implements ActionListener
             this.vista.iniciarJuego(vista.getAlto(), vista.getAncho());
         } else if (comando.contains("DESCUBRIR"))
         {
-            System.out.println("Desubiando");
+
             String[] partes = comando.split("_");
             int i = Integer.parseInt(partes[1]);
             int j = Integer.parseInt(partes[2]);
-            if (!this.tablero.isDescubierta(i, j))
+            System.out.println(i + " " + j);
+            System.out.println(this.tablero.isDadoVuelta(i,j));
+            if (!this.tablero.isDadoVuelta(i, j))
             {
+                System.out.println("Volteando");
                 this.tablero.darVuelta(i, j);
                 this.vista.dibujar(tablero);
             }
