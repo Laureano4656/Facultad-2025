@@ -547,7 +547,7 @@ def calcularTasaCompresion(mensaje: str, mensajeCodificado: bytearray) -> float:
     residuo = mensajeCodificado[0]  # Primer byte indica la cantidad de bits de relleno
     # Calcular el tamaño del mensaje codificado en bits
     print(f"Bits de relleno: {residuo}")
-    codedSize = (len(mensajeCodificado) - 1) * 8 - residuo  # Cada byte en el bytearray ocupa 8 bits
+    codedSize = (len(mensajeCodificado) * 8)   # Cada byte en el bytearray ocupa 8 bits
     
     #codedSize -=  residuo  # Restar los bits de relleno
     # Calcular la tasa de compresión
@@ -699,15 +699,15 @@ msg3 = "UUOOOOAAAIEUUUU"
 
 byteArrayMsg1 = compressRLCToBytes(msg1)
 tasaCompresion1 = calcularTasaCompresion(msg1, byteArrayMsg1)
-print(f"Mensaje: {msg1} -> Comprimido RLC en bytes: {byteArrayMsg1} -> Tasa de compresión: {tasaCompresion1}")
+print(f"Mensaje: {msg1} ->  Tasa de compresión: {tasaCompresion1}")
 
 byteArrayMsg2 = compressRLCToBytes(msg2)
 tasaCompresion2 = calcularTasaCompresion(msg2, byteArrayMsg2)
-print(f"Mensaje: {msg2} -> Comprimido RLC en bytes: {byteArrayMsg2} -> Tasa de compresión: {tasaCompresion2}")
+print(f"Mensaje: {msg2} ->  Tasa de compresión: {tasaCompresion2}")
 
 byteArrayMsg3 = compressRLCToBytes(msg3)
 tasaCompresion3 = calcularTasaCompresion(msg3, byteArrayMsg3)
-print(f"Mensaje: {msg3} -> Comprimido RLC en bytes: {byteArrayMsg3} -> Tasa de compresión: {tasaCompresion3}")
+print(f"Mensaje: {msg3} ->  Tasa de compresión: {tasaCompresion3}")
 
 print("------------------------------------------------------")
 print("Ejercicio 21 y 22")
