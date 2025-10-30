@@ -40,6 +40,9 @@ def getAlfabetoyProbabilidades(cadena):
             apariciones.append(1)
             alfabeto.append(simbolo)
     probabilidades = [aparicion/len(cadena) for aparicion in apariciones]
+    # Ordeno el alfabeto y las probabilidades en base al alfabeto
+    alfabeto_prob = sorted(zip(alfabeto, probabilidades))
+    alfabeto, probabilidades = zip(*alfabeto_prob)
     return alfabeto,probabilidades
 
 
