@@ -30,7 +30,7 @@ def getEntropia(probabilidades):
 ##
 
  #Genero el alfabeto y las probabilidades de sus simbolos dada una cadena
-def getAlfabetoyProbabilidades(cadena):
+def getAlfabetoyProbabilidades(cadena) -> tuple[list[str], list[float]]: 
     alfabeto = list()
     apariciones = list()
     for simbolo in cadena:

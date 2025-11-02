@@ -1,4 +1,4 @@
-package Ejercicio4;
+package Ejercicio3;
 
 public class Mesa
 {

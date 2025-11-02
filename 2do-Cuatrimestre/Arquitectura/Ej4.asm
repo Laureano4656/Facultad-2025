@@ -1,0 +1,70 @@
+dec: PUSH BP
+MOV BP, SP
+PUSH EBX 
+PUSH ECX 
+PUSH EDX 
+MOV ECX, 0 
+MOV EAX, [BP+8] 
+CMP b[EAX], '-'
+JNZ dec_otro
+MOV EDX, 1 
+ADD EAX, 1 
+dec_otro: CMP b[EAX], 0x00
+JZ dec_sig
+MUL ECX, 10
+MOV EBX, b[EAX]
+SUB EBX, '0'
+ADD ECX, EBX
+ADD EAX, 1
+JMP dec_otro
+dec_sig: CMP EDX, 1
+JNZ dec_fin
+NOT ECX
+ADD ECX, 1
+dec_fin: MOV EAX, ECX
+POP EDX
+POP ECX
+POP EBX
+MOV SP,BP
+POP BP
+RET
+main: MOV EAX, [SP+4]
+CMP EAX, 3
+JNZ error
+MOV EAX, [SP+8]
+MOV EBX, [EAX]
+MOV ECX, [EAX+4]
+MOV EDX, [EAX+8]
+PUSH EBX
+CALL dec
+ADD SP, 4
+MOV EBX, EAX
+PUSH EDX
+CALL dec
+ADD SP, 4
+CMP b[ECX], '+'
+JZ suma
+CMP b[ECX], '-'
+JZ resta
+CMP b[ECX], '*'
+JZ mult
+CMP b[ECX], '/'
+JNZ error
+MOV EEX, EBX
+DIV EEX, EAX
+JMP fin
+suma: MOV EEX, EBX
+ADD EEX, EAX
+JMP fin
+resta: MOV EEX, EBX
+SUB EEX, EAX
+JMP fin
+mult: MOV EEX, EBX
+MUL EEX, EAX
+fin: MOV EAX, 1
+MOV EDX, DS
+MOV [EDX], EEX
+LDH ECX, 4
+LDL ECX, 1
+SYS 2
+error: STOP
