@@ -1,4 +1,8 @@
 package Ejercicio1.persistencia;
 
-public interface IPersistencia {
+public interface IPersistencia
+{
+    void persistir();
+    void insertar();
+    void recuperar();
 }

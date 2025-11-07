@@ -1,13 +1,29 @@
-package Ejercicio1;
+package Ejercicio1.incisoA;
 
-public class Motor
+import java.io.Serializable;
+
+public class Motor implements Serializable
 {
     private String n_Serie;
     private String comubstible;
 
-    public Motor(String n_Serie, String comubstible)
+    public void setN_Serie(String n_Serie)
     {
         this.n_Serie = n_Serie;
+    }
+
+    public void setComubstible(String comubstible)
+    {
         this.comubstible = comubstible;
+    }
+
+    public String getN_Serie()
+    {
+        return n_Serie;
+    }
+
+    public String getComubstible()
+    {
+        return comubstible;
     }
 }

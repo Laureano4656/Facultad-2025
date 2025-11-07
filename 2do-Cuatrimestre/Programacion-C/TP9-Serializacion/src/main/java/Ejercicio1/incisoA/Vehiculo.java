@@ -1,14 +1,29 @@
-package Ejercicio1;
+package Ejercicio1.incisoA;
 
-public class Vehiculo
+import java.io.Serializable;
+
+public class Vehiculo implements Serializable
 {
     private String N_Cashis;
     private int anioFabricacion;
 
-    public Vehiculo(String N_Cashis, int anioFabricacion)
+    public void setN_Cashis(String n_Cashis)
     {
-        this.N_Cashis = N_Cashis;
+        N_Cashis = n_Cashis;
+    }
+
+    public void setAnioFabricacion(int anioFabricacion)
+    {
         this.anioFabricacion = anioFabricacion;
     }
 
+    public String getN_Cashis()
+    {
+        return N_Cashis;
+    }
+
+    public int getAnioFabricacion()
+    {
+        return anioFabricacion;
+    }
 }
