@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 public class Cliente
 {
+    private int id;
     private String nombre;
     private String telefono;
     private String direccion;
@@ -17,6 +18,16 @@ public class Cliente
         this.direccion = direccion;
         this.email = email;
         this.mascotas = new ArrayList<>();
+    }
+
+    public int getId()
+    {
+        return id;
+    }
+
+    public void setId(int id)
+    {
+        this.id = id;
     }
 
     public void agregarMascota(Mascota mascota)
