@@ -483,7 +483,7 @@ def getInformacionMutua(probsPriori: list[float], matrizCanal: list[list[float]]
     
     assert abs(informacionMutua1 - informacionMutua2) < 1e-6, "La información mutua calculada por ambos métodos no coincide."
     
-    return informacionMutua2
+    return informacionMutua1
 
 probsPrioriC1 = [0.7, 0.3]
 matrizC1 = [
