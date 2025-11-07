@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="17.0.8" class="java.beans.XMLDecoder">
+ <object class="Ejercicio1.incisoA.Flota" id="Flota0">
+  <void property="automoviles">
+   <void method="add">
+    <object class="Ejercicio1.incisoA.Automovil">
+     <void property="anioFabricacion">
+      <int>2020</int>
+     </void>
+     <void property="marca">
+      <string>Tesla</string>
+     </void>
+     <void property="modelo">
+      <string>Model S</string>
+     </void>
+     <void property="motor">
+      <object class="Ejercicio1.incisoA.Motor">
+       <void property="comubstible">
+        <string>Gasolina</string>
+       </void>
+       <void property="n_Serie">
+        <string>MTR987654</string>
+       </void>
+      </object>
+     </void>
+     <void property="n_Cashis">
+      <string>CHS123456</string>
+     </void>
+     <void property="patente">
+      <string>ABC123</string>
+     </void>
+    </object>
+   </void>
+  </void>
+ </object>
+</java>
