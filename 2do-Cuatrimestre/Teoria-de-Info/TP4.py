@@ -150,47 +150,6 @@ dist_probs = [0.7, 0.3]
 codigoHuffman = getCodigoHuffman(dist_probs)
 print(f"Código Huffman: {codigoHuffman}")
 
-def getSortedIndex ( P: list ) -> list:
-    return sorted([ [pi, i] for i, pi in enumerate(P) ], key=lambda item: item[0], reverse=True)
-
-
-def propagateSubfix( result: list, P: list[list], fix: str ) -> list:
-    for pi, i in P:
-        result[i] +=  fix 
-
-def shannonfano ( result: list, P: list  ):
-    if len(P) <= 1:
-        return
-
-    # calculate split
-    total = sum( [ pi for pi, i in P ]) / 2 
-
-    acum = 0
-    lastDif = 1 
-    splitLocation = -1
-
-
-    for i, pi in enumerate(P):
-        acum += pi[0]
-
-        if acum >= total:
-            if min(lastDif, abs(total - acum)) == lastDif:
-                splitLocation = i
-            else:
-                splitLocation = i + 1
-            
-            firstPart = P[:splitLocation]
-            secondPart = P[splitLocation:]
-
-            propagateSubfix( result, firstPart, '1' )
-            propagateSubfix( result, secondPart, '0' )
-
-            shannonfano( result, firstPart)
-            shannonfano( result, secondPart)
-
-            return
-                
-        lastDif = total - acum
 
 
 def getCodigoShannonFano(probs: list) -> list:
@@ -256,11 +215,7 @@ probs_ejemplo_teoria = [0.4, 0.2,0.15,0.1,0.06,0.04,0.03,0.02]
 codigos_teoria = getCodigoShannonFano(probs_ejemplo_teoria)
 print(f"Probabilidades: {probs_ejemplo_teoria}")
 R = ['']*8
-decreasingP = getSortedIndex(probs_ejemplo_teoria)
-shannonfano(R, decreasingP)
-print(f"Códigos generados implementacion valen: {R}")
-print(f"Codigos generados mi implementacion: {codigos_teoria}")
-print(f"Debe ser:  ['11', '10', '011', '010', '0011', '0010', '0001', '0000']")
+
 
 print("Huffman cumple con el Primer Teorema de Shannon?")
 cumple_huffman = verificar_primer_teorema(dist_probs, codigoHuffman, 1)
@@ -542,20 +497,9 @@ la tasa de compresión.
 
 '''
 def calcularTasaCompresion(mensaje: str, mensajeCodificado: bytearray) -> float:
-    # Calcular el tamaño del mensaje original en bits
-    originalSize = len(mensaje) * 8  # Cada carácter se asume que ocupa 8 bits
-    residuo = mensajeCodificado[0]  # Primer byte indica la cantidad de bits de relleno
-    # Calcular el tamaño del mensaje codificado en bits
-    print(f"Bits de relleno: {residuo}")
-    codedSize = (len(mensajeCodificado) * 8)   # Cada byte en el bytearray ocupa 8 bits
-    
-    #codedSize -=  residuo  # Restar los bits de relleno
-    # Calcular la tasa de compresión
-    if codedSize == 0:
-        return 0.0  # Evitar división por cero si el mensaje codificado está vacío
-    tasaCompresion = originalSize / codedSize
-    
-    return tasaCompresion
+    tamanio_original = len(mensaje) * 8; # Tamaño en bits del mensaje original
+    tamanio_codificado = len(mensajeCodificado) * 8; # Tamaño en bits del mensaje codificado
+    return tamanio_original / tamanio_codificado;
 
 
 print("------------------------------------------------------")
@@ -656,36 +600,26 @@ del carácter y otro byte para el número.
 '''
 
 def compressRLCToBytes(mensaje: str) -> bytearray:
-    if not mensaje:
-        return bytearray()
-
-    count = 1
-    prev_char = mensaje[0]
-    longitudMsg = len(mensaje)
-    bitsRelleno = 0
-    
-    while longitudMsg % 8 != 0:
-        mensaje += '0'  # Rellenar con ceros a la derecha
-        bitsRelleno += 1
-        longitudMsg += 1
-        
-    compressed = bytearray()
-
-    compressed.append(bitsRelleno)  # Primer byte indica la cantidad de bits de relleno
-    
-    for char in mensaje[1:]:
-        if char == prev_char:
-            count += 1
-        else:
-            compressed.append(ord(prev_char))
-            compressed.append(count)
-            prev_char = char
-            count = 1
-
-    compressed.append(ord(prev_char))
-    compressed.append(count)
-
-    return compressed
+    """
+        Comprime un mensaje usando Run Length Encoding (RLC).
+        Devuelve un byteArray con el mensaje comprimido
+    """
+    mensaje_comprimido = bytearray();
+    n = len(mensaje) - 1;
+    i = 0;
+    while i < n:
+        simbolo = mensaje[i];
+        contador = 1;
+        while i < n and mensaje[i] == mensaje[i + 1]:
+            contador += 1;
+            i += 1;
+        i += 1;
+        mensaje_comprimido.append(ord(simbolo)); # Convierto el simbolo a su valor ASCII
+        mensaje_comprimido.append(contador);
+    if mensaje[n] != mensaje[n - 1]: # Si el ultimo simbolo es distinto al penultimo
+        mensaje_comprimido.append(ord(mensaje[n]));
+        mensaje_comprimido.append(1);
+    return mensaje_comprimido;
 
 print("------------------------------------------------------")
 print("Ejercicio 20")
@@ -741,6 +675,7 @@ def erroresCorregibles(codigo: list) -> int:
     dist = distanciaHamming(codigo)
     # La cantidad de errores corregibles es (d - 1) // 2
     return (dist - 1) // 2
+
 codigo1 = ['00', '01', '10', '11']
 codigo2 = ['000', '100', '101', '111']
 codigo3 = ['0000', '0011', '1010', '0101']
@@ -764,17 +699,25 @@ el bit menos significativo para almacenar la paridad del código.
 b. Dado un byte que se obtuvo como resultado de la función anterior, verificar si es
 correcto o tiene errores
 '''
+
+def agregarBitParidadPalabra(palabra: str) -> str:
+    count = palabra.count('1')
+    if count % 2 == 0:
+        return palabra + '0'  # Agrego un 0 si la cantidad de 1s es par
+    else:
+        return palabra + '1'  # Agrego un 1 si la cantidad de 1s es impar
+
 def charToAsciiWithParity(char: str) -> int:
-    ascii_value = ord(char)  # Obtener el valor ASCII del carácter
-    parity_bit = bin(ascii_value).count('1') % 2  # Calcular el bit de paridad (paridad par)
-    ascii_with_parity = (ascii_value << 1) | parity_bit  # Desplazar y agregar el bit de paridad
-    return ascii_with_parity
+    ascii_value = format(ord(char), '07b')  # Obtener el valor ASCII del carácter en 7 bits
+    ascii_with_parity = agregarBitParidadPalabra(ascii_value)  # Agregar bit de paridad
+    return int(ascii_with_parity, 2)  # Convertir de binario a entero
 
 def checkAsciiWithParity(byte: int) -> bool:
-    ascii_value = byte >> 1  # Obtener el valor ASCII desplazando a la derecha
-    parity_bit = byte & 1  # Obtener el bit de paridad
-    # Verificar si la paridad es correcta
-    return (bin(ascii_value).count('1') % 2) == parity_bit
+    codigo_binario = format(byte, '08b');
+    cantidad_1s = codigo_binario.count('1');
+    if(codigo_binario[-1] == '1'):
+        cantidad_1s -= 1;
+    return cantidad_1s % 2 == 0 and codigo_binario[-1] != '0';
 
 print("Ejercicio 26")
 '''
@@ -789,6 +732,46 @@ Sugerencia: generar una matriz de bits para realizar las operaciones, transforma
 secuencia de bytes en una lista de cadenas de caracteres binarias y, luego, cada cadena
 de caracteres en una lista de números enteros que representen los bits.
 '''
+
+def agregarBitParidadVRC(matriz: list[list[float]]) -> list[list[float]]:
+    """
+        Recibe una matriz (lista de listas) de bits (0s y 1s)
+        Agrega una fila al inicio con los bits de paridad VRC
+        Devuelve la matriz con la fila de paridad agregada
+
+        Para usar esta funcion, la matriz debe tener 
+        la paridad por palabra ya agregada
+    """
+    fila_paridad = [];
+    for j in range(len(matriz[0])):
+        cantidad_1s = 0;
+        for i in range(len(matriz)):
+            if matriz[i][j] == 1:
+                cantidad_1s += 1;
+        if cantidad_1s % 2 == 0:
+            fila_paridad.append(0); # Agrego un 0 si la cantidad de 1s es par
+        else:
+            fila_paridad.append(1); # Agrego un 1 si la cantidad de 1s es impar
+    matriz_con_paridad = [fila_paridad] + matriz; # Agrego la fila de paridad al inicio
+    return matriz_con_paridad;
+
+def generarMatrizParidad(mensaje: str) -> list[list[float]]:
+    """
+        Dado un mensaje (string), genero la matriz de paridad VRC
+        Devuelvo la matriz de paridad VRC
+
+        Cada fila es una palabra del mensaje en binario con su bit de paridad
+        La primera fila es la fila de paridad VRC
+    """
+    matriz = []
+    for caracter in mensaje:
+        codigo_ascii = format(ord(caracter), '07b'); # Obtengo el codigo ASCII en binario de 7 bits
+        codigo_ascii_con_paridad = agregarBitParidadPalabra(codigo_ascii); # Agrego el bit de paridad
+        fila = [int(bit) for bit in codigo_ascii_con_paridad]; # Convierto el string a una lista de enteros
+        matriz.append(fila)
+    matriz_con_paridad = agregarBitParidadVRC(matriz)  # Agrego la fila de paridad VRC
+    return matriz_con_paridad
+
 def stringToByteArrayWithParity(s: str) -> bytearray:
     byte_array = bytearray()
     for char in s:
@@ -815,31 +798,116 @@ def stringToByteArrayWithParity(s: str) -> bytearray:
 
     return byte_array
 
+def convertMatrixToByteArray(matriz: list[list[float]]) -> bytearray:
+    byte_array = bytearray()
+    for fila in matriz:
+        codigo_ascii = ''.join([str(bit) for bit in fila])  # Convierto la lista de enteros a un string
+        byte_array.append(int(codigo_ascii, 2))  # Convierto el codigo ASCII a un caracter
+    return byte_array
+
 def byteArrayToStringWithParity(byte_array: bytearray) -> str:
     original_message = ""
-    localByteArray = byte_array[1:]  # Excluir el byte de paridad longitudinal
-    longitudinalParityByte = byte_array[0]
+    
     errors = 0
+    
+    #convierto el byte array a una matriz de floats
+    matriz = []
+    for byte in byte_array:
+        codigo_ascii_con_paridad = format(byte, '08b')  # Obtengo el codigo ASCII en binario de 8 bits
+        fila = [int(bit) for bit in codigo_ascii_con_paridad]; # Convierto el string a una lista de enteros
+        matriz.append(fila)
+    
+    # ut.mostrarMatriz(matriz, "Matriz con paridad")
+
+    # creo una estructura para saber las posiciones de error
+    posiciones_error = []
+
+    # Verificar la paridad cruzada
+    sumPrimeraFila = sum(matriz[0])
+    primeraColumna = [ matriz[i][0] for i in range(len(matriz)) ]
+    sumPrimeraColumna = sum(primeraColumna)
+    
+    if (sumPrimeraColumna % 2) != (sumPrimeraFila % 2):
+        print("Error en paridad cruzada")
+        return ""  # No se puede corregir el error
+
     # Verificar la paridad longitudinal
-    for i in range(8):
+    for j in range(8):
         count = 0
-        for byte in localByteArray:
-            if (byte >> (7 - i)) & 1:
+        for i in range(1, len(matriz)):  # Empiezo desde 1 para saltar la fila de paridad VRC            
+            if matriz[i][j] == 1:
                 count += 1
         parity_bit = count % 2
-        if parity_bit != ((longitudinalParityByte >> (7 - i)) & 1):
+        if parity_bit != matriz[0][j]:
+            print(f"Error en paridad longitudinal en columna {j}")
             errors += 1
-            if errors > 1:
-                return ""  # Más de un error, no se puede corregir
-    for byte in localByteArray:
-        if checkAsciiWithParity(byte):
-            original_message += chr(byte >> 1)
+            posiciones_error.append((j, j))  # 'L' para longitudinal
+
+    # Verificar la paridad VRC
+    for i in range(1, len(matriz)):  # Empiezo desde 1 para saltar la fila de paridad VRC
+        fila = matriz[i][:-1]  # Saco la última columna que es la de paridad
+        cantidad_1s = sum(fila)
+        parity_bit = cantidad_1s % 2        
+        if parity_bit != matriz[i][-1]:  # Si la paridad no es correcta
+            if posiciones_error.count((i, i)) <= 0:  # Si no se detectó un error longitudinal en esta fila
+                errors += 1
+                print(f"Error en paridad VRC en fila {i}")
+                if errors > 1:
+                    return ""  # No se puede corregir el error
+                posiciones_error.append((i, i))  # 'V' para VRC
         else:
-            return ""  # Si hay un error de paridad, devolver cadena vacía
+            # Si la paridad es correcta, decodifico el caracter
+            codigo_ascii = ''.join([str(bit) for bit in fila])  # Convierto la lista de enteros a un string
+            caracter = chr(int(codigo_ascii, 2))  # Convierto el codigo ASCII a un caracter
+            original_message += caracter
+    
+    # Corregir errores si es posible
+    if errors == 1:
+        error_pos = posiciones_error[0]
+        fila_error = error_pos[0]
+        columna_error = error_pos[1]
+        matriz[fila_error][columna_error] ^= 1  # Corregir el bit erróneo
+        print(f"Corrigiendo error en fila {fila_error}, columna {columna_error}")
+        # Decodifico el mensaje corregido
+        original_message = ""
+        for i in range(1, len(matriz)):  # Empiezo desde 1 para saltar la fila de paridad VRC
+            fila = matriz[i][:-1]  # Saco la última columna que es la de paridad
+            codigo_ascii = ''.join([str(bit) for bit in fila])  # Convierto la lista de enteros a un string            
+            caracter = chr(int(codigo_ascii, 2))  # Convierto el codigo ASCII a un caracter
+            original_message += caracter
+
     return original_message
 
-msg = "Hola"
+
+def checkAsciiWithParityBool(byte: list[float]) -> bool:
+    byte = ''.join([str(bit) for bit in byte])
+    cantidad_1s = byte.count('1')
+    if(byte[-1] == '1'):
+        cantidad_1s -= 1
+    return cantidad_1s % 2 == 0 and byte[-1] != '0'
+
+msg = "LUNA"
+def mensajeMatrizParidad(matriz: list[list[float]]) -> str:
+    mensaje = ""
+    for i in range(1, len(matriz)): # Empiezo desde 1 para saltar la fila de paridad VRC
+        fila = matriz[i]
+        codigo_ascii_con_paridad = ''.join([str(bit) for bit in fila]) # Convierto la lista de enteros a un string
+        codigo_ascii = codigo_ascii_con_paridad[:-1] # Quito el bit de paridad
+        caracter = chr(int(codigo_ascii, 2)) # Convierto el codigo ASCII a un caracter
+        mensaje += caracter
+    return mensaje
+
+
+lunaTest = [
+    [0,0,1,0,1,1,0,1],
+    [1,0,0,1,1,0,0,1],
+    [1,0,0,0,1,0,1,0],
+    [1,0,0,1,1,1,0,0],
+    [1,0,0,0,0,0,1,0]
+]
+
+
 byteArrayWithParity = stringToByteArrayWithParity(msg)
 print(f"Byte array con paridad: {byteArrayWithParity}")
-decodedMsg = byteArrayToStringWithParity(byteArrayWithParity)
+decodedMsg = byteArrayToStringWithParity(convertMatrixToByteArray(lunaTest))
 print(f"Mensaje decodificado: {decodedMsg}")

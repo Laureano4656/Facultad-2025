@@ -470,19 +470,17 @@ def getEntropiaAfín(probsPriori: list[float], matrizCanal: list[list[float]]) -
     return entropiaAfin
 
 def getInformacionMutua(probsPriori: list[float], matrizCanal: list[list[float]]) -> float:
-    entropiaPriori = ut.getEntropia(probsPriori)
-    
+    probsSimultaneas = getProbabilidadesSimultaneas(probsPriori, matrizCanal)
     probsSalida = getProbabilidadesSalida(probsPriori, matrizCanal)
-    entropiaSalida = ut.getEntropia(probsSalida)
-    
-    equivocacion = getEquivocacionRuido(probsPriori, matrizCanal)
-    perdida = getPerdida(probsPriori, matrizCanal)
-    
-    informacionMutua1 = entropiaPriori - equivocacion # H(X) - H(X|Y)
-    informacionMutua2 = entropiaSalida - perdida # H(Y) - H(Y|X)
-    
-    assert abs(informacionMutua1 - informacionMutua2) < 1e-6, "La información mutua calculada por ambos métodos no coincide."
-    
+    informacionMutua1 = 0.0
+    for i in range(len(probsPriori)):
+        for j in range(len(probsSalida)):
+            p_xy = probsSimultaneas[i][j]
+            p_x = probsPriori[i]
+            p_y = probsSalida[j]
+            if p_xy > 0:
+                informacionMutua1 += p_xy * math.log2(p_xy / (p_x * p_y))
+                
     return informacionMutua1
 
 probsPrioriC1 = [0.7, 0.3]

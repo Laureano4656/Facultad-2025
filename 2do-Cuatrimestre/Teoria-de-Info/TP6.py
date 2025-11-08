@@ -1,4 +1,4 @@
-import TP5 as utils
+import FuncTeoriaDeLaInfo as utils
 print("-----------------------------------------------")
 print("TP6")
 print("-----------------------------------------------")
@@ -128,8 +128,7 @@ def getCanalCompuesto(canalA: list[list[float]], canalB: list[list[float]]) -> l
     for i in range(filasA):
         for j in range(columnasB):
             for k in range(columnasA):
-                canalCompuesto[i][j] += canalA[i][k] * canalB[k][j]
-        print(canalCompuesto[i])
+                canalCompuesto[i][j] += canalA[i][k] * canalB[k][j]        
     return canalCompuesto
 
 print("Canal 1")
@@ -172,16 +171,18 @@ def verificarColumnasReducibles(matriz: list[list[float]], col1: int, col2: int)
     Ejemplo:
     0.4 y 0.6 son multiplicables (0.6 es 1.5 * 0.4)
     """
-    constantList = [0 for _ in range(len(matriz))]
+    
+    constantList = []
     for i in range(len(matriz)):
         val1 = matriz[i][col1]
         val2 = matriz[i][col2]
         if val1 == 0 and val2 == 0:
-            constantList[i] = 0
-        elif val1 == 0 or val2 == 0:
+            if len(constantList) != 0:
+                constantList.append(constantList[-1])  # agrego el ultimo valor para mantener la consistencia
+        elif val1 == 0 or val2 == 0:    
             return False
         else:
-            constantList[i] = val2 / val1
+            constantList.append(val2 / val1)
     
     firstConstant = None
     for constant in constantList:
@@ -189,41 +190,54 @@ def verificarColumnasReducibles(matriz: list[list[float]], col1: int, col2: int)
             firstConstant = constant
             break
 
-    if firstConstant is None:
+    if firstConstant is None:        
         return True
 
     for constant in constantList:
-        if constant != firstConstant:
+        if constant != firstConstant:            
             return False
 
     return True
 
 def generarMatrizDeterminante(matriz: list[list[float]], col1: int, col2: int) -> list[list[float]]:
     """
-    Genera la matriz del canal determinante necesario para combinar dos columnas.
+    Genera la matriz del canal determinante para combinar 'col1' y 'col2'.
+    La nueva columna combinada estará en el índice 'col1'.
+    
+    (Asegura que col1 sea siempre la más pequeña para que sea el nuevo índice)
     """
-    print("Generando matriz determinante para combinar columnas", col1, "y", col2)
-    cantFilas = len(matriz)
-    cantColumnas = len(matriz[0]) - 1 # una columna menos para la nueva columna combinada
-
-    # debo crear una matriz identidad de tamaño cantFilas x cantColumnas
-    nuevaMatriz = [[0 for _ in range(cantColumnas)] for _ in range(cantFilas)]
-
-    for i in range(len(nuevaMatriz)):
-        nuevaMatriz[i][i] = 1
-
-    # ahora debo realizar una matriz para que cuando la multiplique por la matriz original
-    # combine las columnas col1 y col2 en una sola columna
-    for i in range(cantFilas):
-        if matriz[i][col1] != 0 or matriz[i][col2] != 0:
-            nuevaMatriz[i][col1] = 1
-            nuevaMatriz[i][col2] = 0
-
-    print("Matriz determinante generada:")
-    for fila in nuevaMatriz:
-        print(fila)
+    if col1 > col2:
+        col1, col2 = col2, col1 # col1 siempre será el índice menor
+        
+    cantFilasOrig = len(matriz[0]) # Filas del determinante = Columnas de la matriz original
+    cantColumnasDest = len(matriz[0]) - 1 # Columnas del determinante = Columnas de la matriz nueva
+    
+    nuevaMatriz = [[0 for _ in range(cantColumnasDest)] for _ in range(cantFilasOrig)]
+    
+    # 1. Mapear las dos columnas a combinar
+    # La col1 original -> a la nueva col1
+    nuevaMatriz[col1][col1] = 1
+    # La col2 original -> también a la nueva col1
+    nuevaMatriz[col2][col1] = 1
+    
+    # 2. Mapear el resto de columnas (identidad)
+    colDestino = 0
+    for colOrig in range(cantFilasOrig):
+        
+        # Ignoramos las columnas que ya mapeamos
+        if colOrig == col1 or colOrig == col2:
+            continue
+            
+        # Si la columna de destino es 'col1', la saltamos
+        # porque ya está ocupada por la combinación
+        if colDestino == col1:
+            colDestino += 1
+            
+        nuevaMatriz[colOrig][colDestino] = 1
+        colDestino += 1
+        
+    # utils.mostrarMatriz(nuevaMatriz, f"Matriz determinante para {col1} y {col2}")
     return nuevaMatriz
-
 C1 = [
     [0.4, 0.6, 0.0, 0.0],
     [0.0, 0.0, 0.5, 0.5],
@@ -251,20 +265,57 @@ Codificar una función en Python que reciba como parámetro la matriz de un cana
 utilizando las funciones de los ejercicios 4 y 6, realice todas las reducciones suficientes
 posibles y devuelva la matriz del canal reducido.
 '''
+
 def maxReduccion(matriz: list[list[float]]) -> list[list[float]]:
-    matrizReducida = matriz.copy()
-    for i in range(len(matriz)):
-        for j in range(len(matriz[0])-1):
-            if verificarColumnasReducibles(matrizReducida,j,j+1):
-                matrizDeterminante = generarMatrizDeterminante(matrizReducida,j,j+1)
-                matrizReducida = getCanalCompuesto(matrizReducida, matrizDeterminante)
+    
+    matrizReducida = [fila[:] for fila in matriz]
+    seHizoUnaReduccion = True    
+    while seHizoUnaReduccion:
+        seHizoUnaReduccion = False
+        columnasReducida = len(matrizReducida[0])
+
+        if columnasReducida < 2:
+            break
+
+        # Bucle 'break' anidado
+        # Usamos esto para poder salir de ambos bucles 'for'
+        # cuando se encuentra una reducción
+        
+        # Necesitamos bucles anidados para comprobar CADA par de columnas (col1, col2)
+        for col1 in range(columnasReducida):
+            # Empezamos col2 desde col1 + 1 para no comparar (0,0) ni duplicar (1,0)
+            for col2 in range(col1 + 1, columnasReducida):
+                
+                if verificarColumnasReducibles(matrizReducida, col1, col2):
+                    # Hay un par reducible
+                    matrizDeterminante = generarMatrizDeterminante(matrizReducida, col1, col2)
+                    matrizReducida = getCanalCompuesto(matrizReducida, matrizDeterminante)                    
+                    seHizoUnaReduccion = True                    
+                    # Rompemos AMBOS bucles 'for' para reiniciar el 'while True'
+                    # con la nueva matriz reducida.
+                    break # Rompe el bucle 'col2'
+            
+            if seHizoUnaReduccion:
+                break # Rompe el bucle 'col1'        
+            
     return matrizReducida
 
 print("Reducción de canal C1")
-print("Matriz original:")
-for fila in C1:
-    print(fila)
+utils.mostrarMatriz(C1, "Matriz original C1")
 matrizReducidaC1 = maxReduccion(C1)
-print("Matriz reducida:")
-for fila in matrizReducidaC1:
-    print(fila)
+utils.mostrarMatriz(matrizReducidaC1, "Matriz reducida C1")
+print("***************************")
+print("Reducción de canal C2")
+utils.mostrarMatriz(C2, "Matriz original C2")
+matrizReducidaC2 = maxReduccion(C2)
+utils.mostrarMatriz(matrizReducidaC2, "Matriz reducida C2")
+print("***************************")
+print("Reducción de canal C3")
+utils.mostrarMatriz(C3, "Matriz original C3")
+matrizReducidaC3 = maxReduccion(C3)
+utils.mostrarMatriz(matrizReducidaC3, "Matriz reducida C3")
+print("***************************")
+print("Reducción de canal C4")
+utils.mostrarMatriz(C4, "Matriz original C4")
+matrizReducidaC4 = maxReduccion(C4)
+utils.mostrarMatriz(matrizReducidaC4, "Matriz reducida C4")
