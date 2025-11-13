@@ -1,0 +1,160 @@
+Ejemplo State:
+
+
+public interface State
+{
+    void insertarMoneda();
+    void seleccionarProducto();
+    void retirarProducto();
+}
+
+
+public class MaquinaExpendedora
+{
+    private State estado;
+    /*
+     otros atributos como inventario, etc.
+    */
+
+    public MaquinaExpendedora()
+    {
+        estado = new SinMonedaState(this);
+    }
+
+    public State getEstado()
+    {
+        return estado;
+    }
+
+    public void setEstado(State estado)
+    {
+        this.estado = estado;
+    }
+
+
+    public void insertarMoneda()
+    {
+        estado.insertarMoneda();
+    }
+
+    public void seleccionarProducto()
+    {
+        estado.seleccionarProducto();
+    }
+
+    public void retirarProducto()
+    {
+        estado.retirarProducto();
+    }
+}
+
+public class SinMonedaState implements State
+{
+    private MaquinaExpendedora maquina;
+
+    public SinMonedaState(MaquinaExpendedora maquina)
+    {
+        this.maquina = maquina;
+    }
+
+    public void insertarMoneda()
+    {
+        System.out.println("Moneda insertada. Ahora puede seleccionar un producto.");
+        maquina.setEstado(new ConMonedaState(this.maquina));
+    }
+
+    public void seleccionarProducto()
+    {
+        System.out.println("Debe insertar una moneda primero.");
+    }
+
+    public void retirarProducto()
+    {
+        System.out.println("Debe insertar una moneda y seleccionar un producto primero.");
+    }
+}
+
+ublic class ConMonedaState implements State
+{
+    private MaquinaExpendedora maquina;
+
+    public ConMonedaState(MaquinaExpendedora maquina)
+    {
+        this.maquina = maquina;
+    }
+
+    public void insertarMoneda()
+    {
+        System.out.println("Ya hay una moneda insertada.");
+    }
+
+    public void seleccionarProducto()
+    {
+        System.out.println("Producto seleccionado. Retire su producto.");
+        maquina.setEstado(new RetirarProductoState(this.maquina));
+    }
+
+    public void retirarProducto()
+    {
+        System.out.println("Debe seleccionar un producto primero.");
+    }
+}
+
+public class AgotadoState implements State
+{
+    private MaquinaExpendedora maquina;
+
+    public AgotadoState(MaquinaExpendedora maquina)
+    {
+        this.maquina = maquina;
+    }
+
+    public void insertarMoneda()
+    {
+        System.out.println("La máquina está agotada. No se pueden aceptar monedas.");
+    }
+
+    public void seleccionarProducto()
+    {
+        System.out.println("La máquina está agotada. No hay productos disponibles.");
+    }
+
+    public void retirarProducto()
+    {
+        System.out.println("La máquina está agotada. No hay productos para retirar.");
+    }
+}
+
+public class RetirarProductoState implements State
+{
+    private MaquinaExpendedora maquina;
+
+    public RetirarProductoState(MaquinaExpendedora maquina)
+    {
+        this.maquina = maquina;
+    }
+
+    public void insertarMoneda()
+    {
+        System.out.println("Por favor, retire su producto antes de insertar otra moneda.");
+    }
+
+    public void seleccionarProducto()
+    {
+        System.out.println("Por favor, retire su producto antes de seleccionar otro.");
+    }
+
+    public void retirarProducto()
+    {
+        /*
+        Lógica para dispensar el producto
+         */
+         if ( /*no se encuentra el producto */ )
+             maquina.setEstado(new AgotadoState(this.maquina));
+        else
+            maquina.setEstado(new SinMonedaState(maquina));
+    }
+}
+
+
+

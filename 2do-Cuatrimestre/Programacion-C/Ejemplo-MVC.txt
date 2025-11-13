@@ -1,0 +1,29 @@
+MODELO (Model)
+⦁	Responsabilidad: Contiene los datos y la lógica de negocio
+⦁	Incluye atributos.
+⦁	Métodos de negocio.
+⦁	No sabe nada sobre la interfaz de usuario
+
+VISTA (View)
+⦁	Interfaz IVista.
+⦁	Clase EstudianteVista extiende a JFrame.
+⦁	Responsabilidad: Presenta los datos al usuario.
+⦁	Métodos de visualización.
+⦁	Valida los datos ingresados por el usuario.
+⦁	No contiene lógica de negocio.
+⦁	Delega la gestión de eventos al controlador.
+⦁	No conoce ni al controlador ni al modelo.
+⦁	En caso de aplicar el patrón Observer, Observable la vista escucha al modelo.
+
+CONTROLADOR (Controller)
+⦁	Responsabilidad: Intermediario entre Modelo y Vista.
+⦁	Recibe las acciones del usuario.
+⦁	Actualiza el Modelo según las acciones.
+⦁	Solicita a la Vista que se actualice.
+⦁	Contiene validaciones y lógica de control.
+
+Ventajas de MVC:
+⦁	Separación de responsabilidades: Cada componente tiene un propósito claro
+⦁	Mantenibilidad: Cambios en la interfaz no afectan la lógica de negocio
+⦁	Reutilización: El modelo puede usarse con diferentes vistas
+⦁	Testabilidad: Cada capa se puede probar independientemente

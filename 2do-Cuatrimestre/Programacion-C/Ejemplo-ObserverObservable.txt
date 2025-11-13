@@ -1,0 +1,53 @@
+Ejemplo Observer/Observable:
+Feed de Red Social 
+Sujeto (Observable): PerfilUsuario.
+
+Observadores: Seguidor (los perfiles de sus seguidores).
+
+Evento (Notificación): El PerfilUsuario (sujeto) invoca su método publicarPost(nuevoPost).
+
+Acción (update): Cada Seguidor (observador) recibe el nuevoPost y lo agrega a su timeline o feed de noticias personal.
+
+public class PerfilUsuario extends Observable
+{
+    /*
+        Atributos para el perfil del usuario
+     */
+
+    public void publicarActualizacion(String actualizacion)
+    {
+        /*
+            Lógica para agregar la actualización al perfil
+         */
+        setChanged();
+        notifyObservers(actualizacion);
+    }
+}
+
+public class Seguidor implements Observer
+{
+    private ArrayList<PerfilUsuario> seguidos;
+
+    public Seguidor(PerfilUsuario p)
+    {
+        seguidos = new ArrayList<PerfilUsuario>();
+        seguidos.add(p);
+        p.addObserver(this);
+    }
+
+    public void seguir(PerfilUsuario p)
+    {
+        seguidos.add(p);
+        p.addObserver(this);
+    }
+
+    @Override
+    public void update(Observable o, Object arg)
+    {
+        if (!this.seguidos.contains(o))
+            throw new IllegalArgumentException("El perfil no es seguido por este seguidor.");
+        /*
+            Lógica para manejar la actualización del perfil seguido
+        */
+    }
+}
