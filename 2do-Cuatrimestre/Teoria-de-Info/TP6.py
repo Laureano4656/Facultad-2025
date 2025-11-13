@@ -1,4 +1,5 @@
 import FuncTeoriaDeLaInfo as utils
+import math
 print("-----------------------------------------------")
 print("TP6")
 print("-----------------------------------------------")
@@ -319,3 +320,245 @@ print("Reducción de canal C4")
 utils.mostrarMatriz(C4, "Matriz original C4")
 matrizReducidaC4 = maxReduccion(C4)
 utils.mostrarMatriz(matrizReducidaC4, "Matriz reducida C4")
+
+print("-----------------------------------------------")
+print("Ejercicio 8")
+
+def isSimetrico(matriz: list[list[float]]) -> bool:
+    """
+    En un canal simétrico los elementos de las filas y las columnas
+    son iguales pero permutados.
+    """
+    primeraFila = matriz[0]
+    for fila in matriz[1:]:
+        if sorted(fila) != sorted(primeraFila):
+            return False
+    # ahora verifico las columnas
+    primeraColumna = [matriz[i][0] for i in range(len(matriz))]
+    for j in range(1, len(matriz[0])):
+        columna = [matriz[i][j] for i in range(len(matriz))]
+        if sorted(columna) != sorted(primeraColumna):
+            return False
+    return True
+
+def isUniforme(matriz: list[list[float]]) -> bool:
+    """
+    Un canal es uniforme si cada fila consiste en una permutación
+    arbitraria de los términos de la primera fila.
+    """
+    primeraFila = matriz[0]
+    for fila in matriz[1:]:
+        if sorted(fila) != sorted(primeraFila):
+            return False
+    return True
+
+def isCanalBSC(matriz: list[list[float]]) -> bool:
+    """
+    Verifica si un canal es un canal BSC (Binary Symmetric Channel).
+    Un canal BSC tiene dos entradas y dos salidas, y la probabilidad de error es la misma para ambas entradas.
+    """
+    if len(matriz) != 2 or len(matriz[0]) != 2:
+        return False
+    pError = matriz[0][1]
+    if matriz[1][0] != pError:
+        return False
+    return True
+
+def calcCapacidad(matriz: list[list[float]]) -> float:
+    """
+    Calcula la capacidad del canal dado su matriz de transición.
+    La capacidad se define como el máximo de la información mutua sobre todas las distribuciones de probabilidad de entrada posibles.
+    """
+    numEntradas = len(matriz)
+    numSalidas = len(matriz[0])
+
+    if (isDeterminante(matriz)):
+        print("Canal determinante")
+        return math.log2(numSalidas)
+    
+    if (isSinRuido(matriz)):
+        print("Canal sin ruido")
+        return math.log2(numEntradas)
+    
+    if (isSimetrico(matriz)):
+        print("Canal simétrico")
+        # para canales simétricos tengo que obtener la entropía del canal
+        primeraFila = matriz[0]
+        return math.log2(numEntradas) - utils.getEntropia(primeraFila)
+    
+    if (isUniforme(matriz)):
+        print("Canal uniforme")
+        # debo calcular la entropia de la primera fila
+        primeraFila = matriz[0]
+        return math.log2(numEntradas) - utils.getEntropia(primeraFila)        
+
+    if (isCanalBSC(matriz)):
+        print("Canal BSC")
+        pError = matriz[0][1]
+        return 1 - (-pError * math.log2(pError) - (1 - pError) * math.log2(1 - pError))
+    
+
+C1 = [
+    [0.0, 1, 0],
+    [0, 0, 1],
+    [0, 1, 0],
+    [1, 0, 0]
+    ]
+C2 = [
+    [1, 0, 0, 0],
+    [0, 0.2, 0, 0.2],
+    [0, 0, 1, 0]
+]
+
+C3 = [
+    [0.3, 0.5, 0.2],
+    [0.2, 0.3, 0.5],
+    [0.5, 0.2, 0.3]
+]
+
+C4 = [
+    [0, 0, 1, 0],
+    [1, 0, 0, 0],
+    [0, 1, 0, 0],
+    [0, 0, 0, 1]
+    ]
+
+print("Canal C1")
+capacidadC1 = calcCapacidad(C1)
+print("Capacidad del canal C1:", capacidadC1)
+print("***************************")
+print("Canal C2")
+capacidadC2 = calcCapacidad(C2)
+print("Capacidad del canal C2:", capacidadC2)
+print("***************************")
+print("Canal C3")
+capacidadC3 = calcCapacidad(C3)
+print("Capacidad del canal C3:", capacidadC3)
+print("***************************")
+print("Canal C4")
+capacidadC4 = calcCapacidad(C4)
+print("Capacidad del canal C4:", capacidadC4)
+
+print("-----------------------------------------------")
+print("Ejercicio 10 y 11")
+'''
+Realizar una función en Python que reciba como parámetros: la matriz de un canal binario
+y un valor de paso, y estime la capacidad del canal mediante el cálculo de la información
+mutua para un conjunto de probabilidades a priori distribuidas uniformemente según el
+paso especificado. La función debe retornar el valor de capacidad estimado, junto con su
+probabilidad asociada
+'''
+def estimarCapacidadCanalBinario(matriz: list[list[float]], paso: float) -> tuple[float, float]:
+    """
+    Estima la capacidad de un canal binario mediante el cálculo de la información mutua
+    para un conjunto de probabilidades a priori distribuidas uniformemente según el paso especificado.
+    Retorna el valor de capacidad estimado junto con su probabilidad asociada.
+    """
+    maxInfoMutua = 0.0
+    probabilidadAsociada = 0.0
+    
+    p = 0.0
+    while p <= 1.0:
+        probsPriori = [p, 1 - p]
+        infoMutua = utils.getInformacionMutua(probsPriori, matriz)
+        
+        if infoMutua > maxInfoMutua:
+            maxInfoMutua = infoMutua
+            probabilidadAsociada = p
+            
+        p += paso
+    
+    return maxInfoMutua, probabilidadAsociada
+
+C1 =[
+    [0.6, 0.4],
+    [0.2, 0.8]
+]
+C2 =[
+    [0.25, 0.75],
+    [0.9, 0.10]
+]
+C3 = [
+    [0.51, 0.49],
+    [0.72, 0.28]
+]
+C4 = [
+    [0.77, 0.23],
+    [0.20, 0.80]
+]
+paso = 0.0001
+print("Canal C1")
+capacidadC1, probC1 = estimarCapacidadCanalBinario(C1, paso)
+print("Capacidad estimada del canal C1:", capacidadC1, "con probabilidad asociada:", probC1)
+print("***************************")
+print("Canal C2")
+capacidadC2, probC2 = estimarCapacidadCanalBinario(C2, paso)
+print("Capacidad estimada del canal C2:", capacidadC2, "con probabilidad asociada:", probC2)
+print("***************************")
+print("Canal C3")
+capacidadC3, probC3 = estimarCapacidadCanalBinario(C3, paso)
+print("Capacidad estimada del canal C3:", capacidadC3, "con probabilidad asociada:", probC3)
+print("***************************")
+print("Canal C4")
+capacidadC4, probC4 = estimarCapacidadCanalBinario(C4, paso)
+print("Capacidad estimada del canal C4:", capacidadC4, "con probabilidad asociada:", probC4)
+
+print("-----------------------------------------------")
+print("Ejercicio 12, 13 y 14")
+'''
+Desarrollar una función en Python que reciba como parámetros: una lista con
+probabilidades a priori y la matriz de un canal, y calcule la probabilidad de error utilizando
+la regla de decisión de máxima posibilidad.
+'''
+def calcProbabilidadError(probsPriori: list[float], matriz: list[list[float]]) -> float:
+    """
+    Calcula la probabilidad de error utilizando la regla de decisión de máxima posibilidad.
+    """
+    # debo encontrar los maximos de la matriz por columna
+    numEntradas = len(matriz)
+    numSalidas = len(matriz[0])
+    indicesMaximos = [-1 for _ in range(numSalidas)]
+    for j in range(numSalidas):
+        maxVal = -1
+        indiceMax = -1
+        for i in range(numEntradas):
+            if matriz[i][j] > maxVal:
+                maxVal = matriz[i][j]
+                indiceMax = i
+        indicesMaximos[j] = indiceMax
+
+    # Calculo la probabilidad de error sumando las probabilidades excepto las de los maximos
+    probabilidadError = 0.0
+    for j in range(numSalidas):
+        for i in range(numEntradas):
+            if i != indicesMaximos[j]:
+                probabilidadError += probsPriori[i] * matriz[i][j]
+
+    return probabilidadError
+
+matriz12 = [
+    [0.6, 0.4],
+    [0.2, 0.8]
+]
+probsPriori12 = [0.5, 0.5]
+probError12 = calcProbabilidadError(probsPriori12, matriz12)
+print("Probabilidad de error del canal 12:", probError12)
+
+matriz13 = [
+    [0.6,0.3,0.1],
+    [0.1,0.8,0.1],
+    [0.3,0.3,0.4]
+]
+probsPriori13a = [1/3, 1/3, 1/3]
+probsPriori13b = [1/8, 3/8, 4/8]
+probsPriori13c = [4/15,3/15,8/15]
+
+probError13 = calcProbabilidadError(probsPriori13a, matriz13)
+print("Probabilidad de error del canal 13:", probError13)
+
+probError13b = calcProbabilidadError(probsPriori13b, matriz13)
+print("Probabilidad de error del canal 13 con probs priori b):", probError13b)
+
+probError13c = calcProbabilidadError(probsPriori13c, matriz13)
+print("Probabilidad de error del canal 13 con probs priori c):", probError13c)
+

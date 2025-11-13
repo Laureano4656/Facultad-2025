@@ -534,7 +534,7 @@ probs = [
   0.058406, 0.031093, 0.033240, 0.008930, 0.000012, 0.000706, 0.007851, 0.003199,
 ]
 
-mensaje = "RESPETO MAXIMO"
+mensaje = "RESPETO ÑO"
 
 codigoHuffman = getCodigoHuffman(probs)
 byteArrayMsg = codeMessage(codigoHuffman, mensaje, alfabeto)
