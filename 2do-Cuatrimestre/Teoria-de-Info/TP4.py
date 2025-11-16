@@ -432,7 +432,7 @@ ceros, tanto para codificar como para decodificar, y realizar las conversiones e
 y enteros con las funciones de casteo correspondientes
 '''
 
-def codeMessage(codigo: list, mensaje: str,alfabeto = [],) -> bytearray:
+def codeMessage(codigo: list, mensaje: str,alfabeto = []) -> bytearray:
     if not len(alfabeto) :
         alfabeto, _ = ut.getAlfabetoyProbabilidades(mensaje)
     # Crear un diccionario para mapear cada símbolo a su código binario
@@ -905,9 +905,27 @@ lunaTest = [
     [1,0,0,1,1,1,0,0],
     [1,0,0,0,0,0,1,0]
 ]
-
+casaTest =[
+    [0,0,1,0,0,0,0,1],
+    [1,0,0,0,0,1,1,1],
+    [1,0,0,0,0,0,1,0],
+    [1,0,1,0,0,1,1,0],
+    [1,0,0,0,0,0,1,0]
+]
+muchosErroresTest = [
+    [0,0,1,0,1,0,1,0],
+    [1,0,0,0,0,0,1,0],
+    [1,0,0,1,1,0,1,0],
+    [1,0,0,1,1,1,1,1],
+    [1,0,1,0,0,1,0,1]
+]
 
 byteArrayWithParity = stringToByteArrayWithParity(msg)
 print(f"Byte array con paridad: {byteArrayWithParity}")
 decodedMsg = byteArrayToStringWithParity(convertMatrixToByteArray(lunaTest))
 print(f"Mensaje decodificado: {decodedMsg}")
+decodedMsg2 = byteArrayToStringWithParity(convertMatrixToByteArray(casaTest))
+print(f"Mensaje decodificado 2: {decodedMsg2}")
+
+decodedMsg3 = byteArrayToStringWithParity(convertMatrixToByteArray(muchosErroresTest))
+print(f"Mensaje decodificado 3 (muchos errores): {decodedMsg3}")

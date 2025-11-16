@@ -382,7 +382,12 @@ def probabilidadesOrdenN(probs, N):
 ###########################################################
                     #TP4#
 ###########################################################
-
+"""
+Primer teorma de shannon. Determina si se verifica el primer teorema de shannon
+dado un conjunto de probabilidades, un codigo y un orden N.
+Para realizar esto obtiene la entropia del codigo, las probabilidades de la extension (orden N) de la fuente
+y la longitud media del codigo para dichas probabilidades.
+"""
 def verificar_primer_teorema(probabilidades, codigo, N):
     # Calcular la entropía de la fuente
     H = getEntropiaCodigoR(codigo,probabilidades)
@@ -397,7 +402,17 @@ def verificar_primer_teorema(probabilidades, codigo, N):
     
     return cumple_teorema
 
-
+"""
+Pasos algoritmo de Huffman:
+ Consideremos S: {s1, s2,..,sq} y P {p1,P2 , ..., Pq }
+    1. INICIALIZACIÓN: Cada símbolo se asocia con su probabilidad.
+    2. BUCLE ITERATIVO: Mientras haya más de un símbolo en la lista:
+        a. Ordenar la lista de símbolos por probabilidad.
+        b. Extraer los dos símbolos con las menores probabilidades.
+        c. CONSTRUCCIÓN DE CÓDIGOS: A los símbolos del primer grupo se les añade un '0' al inicio de su código, y a los del segundo grupo un '1'.
+        d. COMBINACIÓN: Crear un nuevo símbolo que combine ambos grupos, con una probabilidad igual a la suma de las dos.
+    3. RESULTADO: Al finalizar, cada símbolo tendrá un código binario único asignado.
+"""
 def getCodigoHuffman(probs: list) -> list:
     """
     Genera códigos Huffman de forma iterativa utilizando una lista de listas
@@ -443,7 +458,13 @@ def getCodigoHuffman(probs: list) -> list:
 
     return codigos
 
-
+"""
+Pasos algoritmo de Shannon-Fano:
+    1. ORDENAR: Ordenar los símbolos en orden descendente según sus probabilidades.
+    2. DIVIDIR: Dividir la lista en dos grupos, de modo que la suma de las probabilidades de cada grupo sea lo más cercana posible.
+    3. ASIGNAR CÓDIGOS: Asignar un '0' a todos los símbolos del primer grupo y un '1' a los del segundo grupo.
+    4. RECURSIVIDAD: Aplicar recursivamente el proceso a cada grupo hasta que cada símbolo tenga un código único.
+"""
 def getCodigoShannonFano(probs: list) -> list:
     # Caso base: si solo hay un elemento, no hay más divisiones que hacer.
     if len(probs) <= 1:
@@ -495,57 +516,7 @@ def getCodigoShannonFano(probs: list) -> list:
         resultado[item[1]] = codigos2[i] 
         
     return resultado
-def getCodigoShannonFano(probs: list) -> list:
-    # Caso base: si solo hay un elemento, no hay más divisiones que hacer.
-    if len(probs) <= 1:
-        return [""]
 
-    # 1. ORDENAR Y PREPARAR DATOS
-    # Guardamos cada probabilidad junto a su índice original.
-    items = sorted([[p, i] for i, p in enumerate(probs)], reverse=True)
-    total = sum(probs)
-
-    # 2. ENCONTRAR EL MEJOR PUNTO DE DIVISIÓN
-    mejor_indice = -1
-    # La diferencia nunca será mayor que el total.
-    mejor_diferencia = float('inf') 
-
-    suma_actual = 0
-    # El bucle debe encontrar el mejor índice, no hacer el trabajo recursivo.
-    # Iteramos por todos los posibles puntos de corte.
-    for i in range(len(items) - 1):
-        suma_actual += items[i][0]
-        diferencia = abs(suma_actual - (total - suma_actual))
-        
-        if diferencia < mejor_diferencia:
-            mejor_diferencia = diferencia
-            mejor_indice = i + 1 # El corte es DESPUÉS del elemento 'i'
-    
-    # 3. DIVIDIR Y HACER LAS LLAMADAS RECURSIVAS (FUERA DEL BUCLE)
-    grupo1 = items[:mejor_indice]
-    grupo2 = items[mejor_indice:]
-
-    # Extraemos las probabilidades para las llamadas recursivas
-    probs1 = [item[0] for item in grupo1]
-    probs2 = [item[0] for item in grupo2]
-
-    # Llamadas recursivas para los subgrupos
-    codigos1 = getCodigoShannonFano(probs1)
-    codigos2 = getCodigoShannonFano(probs2)
-    
-    codigos1 = ["1"+c  for c in codigos1]
-    codigos2 = ["0"+c for c in codigos2]
-
-    # Añadimos '0' y '1' a los códigos resultantes
-
-    # 4. RECONSTRUIR EL RESULTADO EN EL ORDEN ORIGINAL
-    resultado = [""] * len(probs)
-    for i, item in enumerate(grupo1):
-        resultado[item[1]] = codigos1[i]
-    for i, item in enumerate(grupo2):
-        resultado[item[1]] = codigos2[i] 
-        
-    return resultado
 
 ## Solucion valen:
 def getSortedIndex ( P: list ) -> list:
@@ -615,14 +586,25 @@ def generarCodigoShannonFano(probabilidades):
     shanonFano(lista);
     return codigo;
 
-
+"""
+El rendimiento o eficiencia de un código mide qué tan cerca está la longitud media
+del código (L) de la entropía (H) de la fuente. Se calcula como R = H / L.
+El R es máximo si L es igual a H, lo que indica que el código es óptimo.
+Se calcula obteniendo la entropía del código, la longitud media de sus símbolos
+y aplicando la formula R = H / L.
+"""
 def calcularRendimiento(probabilidades, codigo):
     H = getEntropiaCodigoR(codigo,probabilidades)
     L = getLongitudMedia(codigo,probabilidades)
-    R = H / L if L != 0 else 0
-    D = 1 - R
+    R = H / L if L != 0 else 0    
     return R
 
+"""
+La redundancia de un código se define como 1-R = (L - H) / L, donde R es el rendimiento del código.
+Mayor redundancia implica menor información. Cuando el código es óptimo, la redundancia es mínima.
+Se calcula obteniendo la entropía del código, la longitud media de sus símbolos, aplicando la formula del rendimiento
+y restando el resultado a 1.
+"""
 def calcularRedundancia(probabilidades, codigo):
     H = getEntropiaCodigoR(codigo,probabilidades)
     L = getLongitudMedia(codigo,probabilidades)
@@ -630,7 +612,28 @@ def calcularRedundancia(probabilidades, codigo):
     D = 1 - R
     return D
 
-def codeMessage(codigo: list, mensaje: str,alfabeto = [],) -> bytearray:
+"""
+Codifica un mensaje usando un código binario dado y devuelve un bytearray.
+El primer byte del bytearray indica la cantidad de bits de relleno añadidos al final
+para completar el último byte.
+PASOS:
+1. Crear un diccionario que mapea cada símbolo del alfabeto a su código binario.
+2. Recorrer el mensaje original y construir la cadena de bits codificada.
+3. Añadir bits de relleno (ceros) al final para que la longitud total sea múltiplo de 8.
+4. Convertir la cadena de bits en un bytearray, donde el primer byte indica la cantidad de bits de relleno.
+
+"""
+def codeMessage(codigo: list, mensaje: str,alfabeto: list[float] = []) -> bytearray:
+
+    """Codifica un mensaje usando un código binario dado y devuelve un bytearray.
+    Args:
+        codigo (list): Lista de códigos binarios para cada símbolo.
+        mensaje (str): Mensaje a codificar.
+        alfabeto (list[float], optional): Alfabeto de símbolos. Defaults to [].
+
+    Returns:
+        bytearray: Bytearray que contiene el mensaje codificado.
+    """
     if not len(alfabeto) :
         alfabeto, _ = getAlfabetoyProbabilidades(mensaje)
     # Crear un diccionario para mapear cada símbolo a su código binario
@@ -655,9 +658,26 @@ def codeMessage(codigo: list, mensaje: str,alfabeto = [],) -> bytearray:
     
     return byte_array
 
-
+"""
+Decodifica un mensaje codificado en un bytearray usando un código binario dado.
+PASOS:
+1. Crear un diccionario que mapea cada código binario a su símbolo correspondiente.
+2. Convertir el bytearray de nuevo a una cadena de bits.
+3. Eliminar los bits de relleno al final según lo indicado en el primer byte.
+4. Recorrer la cadena de bits y decodificar el mensaje utilizando el diccionario.
+"""
 def decodeMessage(alfabeto: list, codigo: list, byte_array: bytearray) -> str:
-    
+    """
+    Decodifica un mensaje codificado en un bytearray usando un código binario dado.
+
+    Args:
+        alfabeto (list): Lista de símbolos del alfabeto.
+        codigo (list): Lista de códigos binarios para cada símbolo.
+        byte_array (bytearray): Bytearray que contiene el mensaje codificado.
+
+    Returns:
+        str: Mensaje decodificado.
+    """
     # Crear un diccionario para mapear cada código binario a su símbolo
     codigoDict = {codigo[i]: alfabeto[i] for i in range(len(alfabeto))}
     
@@ -691,7 +711,14 @@ def readFile(name: str) -> bytearray:
     with open(name, 'rb') as file:
         byte_array = bytearray(file.read())
     return byte_array
-
+"""
+    Comprime un mensaje usando Run Length Encoding (RLC).
+    Pasos:
+    1. Inicializar un bytearray vacío para el mensaje comprimido.
+    2. Recorrer el mensaje original y contar las ocurrencias consecutivas de cada símbolo
+    3. Para cada símbolo y su contador, agregar al bytearray el valor ASCII del símbolo y el contador.
+    4. Devolver el bytearray con el mensaje comprimido.
+"""
 def compressRLCToBytes(mensaje: str) -> bytearray:
     """
         Comprime un mensaje usando Run Length Encoding (RLC).
@@ -714,6 +741,15 @@ def compressRLCToBytes(mensaje: str) -> bytearray:
         mensaje_comprimido.append(1);
     return mensaje_comprimido;
 
+"""
+Se define como Distancia de Hamming entre dos palabras al número de bits que difieren una
+de otra. La distancia de Hamming mínima de un código es la menor distancia de Hamming
+entre todas las parejas de palabras código del mismo.
+PASOS:
+1. Inicializar una variable para la distancia mínima con un valor alto.
+2. Recorrer todas las parejas de palabras código y calcular la distancia de Hamming entre ellas.
+3. Si la distancia calculada es menor que la distancia mínima actual, actualizar la distancia mínima
+"""
 def distanciaHamming(codigo: list) -> int:
     min_distance = float('inf')
     n = len(codigo)
@@ -749,6 +785,15 @@ def charToAsciiWithParity(char: str) -> int:
     ascii_with_parity = agregarBitParidadPalabra(ascii_value)  # Agregar bit de paridad
     return int(ascii_with_parity, 2)  # Convertir de binario a entero
 
+"""
+Convierte una cadena de caracteres en un bytearray, agregando bits de paridad VRC y LRC.
+Se utilizar el criterio de paridad par: 0 si la cantidad de 1s es par, 1 si es impar.
+PASOS:
+1. Convertir cada carácter a su valor ASCII de 7 bits y agregar un bit de paridad VRC.
+2. Calcular los bits de paridad longitudinal (LRC) para cada bit de las posiciones 0 a 7.
+3. Combinar los bits de paridad LRC en un solo byte y agregarlo al principio del bytearray.
+4. Devolver el bytearray resultante.
+"""
 def stringToByteArrayWithParity(s: str) -> bytearray:
     byte_array = bytearray()
     for char in s:
@@ -781,7 +826,15 @@ def convertMatrixToByteArray(matriz: list[list[float]]) -> bytearray:
         codigo_ascii = ''.join([str(bit) for bit in fila])  # Convierto la lista de enteros a un string
         byte_array.append(int(codigo_ascii, 2))  # Convierto el codigo ASCII a un caracter
     return byte_array
-
+"""
+Convierte un bytearray con bits de paridad VRC y LRC de vuelta a la cadena original,
+corrigiendo errores si es posible.
+PASOS:
+1. Convertir el bytearray a una matriz de bits.
+2. Verificar la paridad cruzada, longitudinal y VRC.
+3. Si se detecta un error, intentar corregirlo si es posible.
+4. Decodificar los caracteres originales de la matriz y devolver la cadena resultante.
+"""
 def byteArrayToStringWithParity(byte_array: bytearray) -> str:
     original_message = ""
     
@@ -859,7 +912,22 @@ def byteArrayToStringWithParity(byte_array: bytearray) -> str:
 #######################################################
 #                  #TP5#
 #######################################################
+"""
+Probabilidad condicional:
+P (A/B) = P (A ∩ B) / P (B) , siempre que P (B) > 0
+"""
 
+"""
+Un canal de información viene determinado por un
+alfabeto de entrada A = {ai}, i = 1, 2, ..., r ; un alfabeto de
+salida B = {bj} , j = 1, 2, ..., s ; y un conjunto de
+probabilidades condicionales P (bj/ai). Por eso es que apartir de una cadena de entrada y una de salida
+se puede obtener la matriz de canal.
+PASOS:
+1. Identificar los símbolos únicos en las secuencias de entrada y salida.
+2. Contar las ocurrencias de cada símbolo de entrada (denominador) y las ocurrencias conjuntas de pares (entrada, salida) (numerador).
+3. Calcular las probabilidades condicionales P(bj/ai) y construir la matriz de canal.
+"""
 def getMatrizCanal(entrada:str, salida:str) ->list:
 
     if len(entrada) != len(salida):
@@ -902,13 +970,25 @@ def getMatrizCanal(entrada:str, salida:str) ->list:
     matrizCanal = [[0.0] * numColumnas for _ in range(num_filas)]
 
     for simbolo_in, i in mapa_entrada.items():
-        total_apariciones = conteo_entrada[simbolo_in]
+        total_apariciones = conteo_entrada[simbolo_in] # cantidad de apariciones del símbolo de entrada
+        # Evitar división por cero
         if total_apariciones > 0:
+            # Calcular P(bj/ai) para cada símbolo de salida
             for j in range(numColumnas):
                 matrizCanal[i][j] = conteo_pares[i][j] / total_apariciones
     
     return matrizCanal
 
+"""
+Las probabilidades de salida de un canal se calculan utilizando las probabilidades a priori de los símbolos de entrada
+y la matriz de canal que contiene las probabilidades condicionales P(bj/ai). Ya que la probabilidad de salida P(bj) se obtiene sumando
+las contribuciones de todas las entradas posibles ai, ponderadas por sus probabilidades a priori P(ai).
+P(bj) = sum_i P(ai) * P(bj/ai)
+PASOS:
+1. Inicializar una lista para las probabilidades de salida con ceros.
+2. Para cada símbolo de salida bj, calcular su probabilidad sumando las contribuciones de todas las entradas ai.
+3. Devolver la lista de probabilidades de salida.
+"""
 def getProbabilidadesSalida(probsPriori: list[float], matrizCanal: list[list[float]]) -> list[float]:
     
     num_simbolos_salida = len(matrizCanal[0])
@@ -919,7 +999,10 @@ def getProbabilidadesSalida(probsPriori: list[float], matrizCanal: list[list[flo
             probs_salida[j] += probsPriori[i] * matrizCanal[i][j]
 
     return probs_salida
-
+"""
+Hace lo mismo que getProbabilidadesSalida pero recibe las cadenas de entrada y salida
+y calcula la matriz de canal y las probabilidades a priori internamente.
+"""
 def getProbabilidadesSalidaConMsg(entrada: str, salida: str) -> list:
     matrizCanal = getMatrizCanal(entrada, salida)
     probsPriori =getAlfabetoyProbabilidades(entrada)[1]
@@ -931,8 +1014,10 @@ def getProbabilidadesSalidaConMsg(entrada: str, salida: str) -> list:
             probs_salida[j] += probsPriori[i] * matrizCanal[i][j]
 
     return probs_salida
+"""
 
-def getProbabilidadesSimultaneasConMsg(entrada: str, salida: str) -> list:
+"""
+def getMatrizSucesosSimultaneosConMsg(entrada: str, salida: str) -> list[list[float]]:
     matrizCanal = getMatrizCanal(entrada, salida)
     probsPriori =getAlfabetoyProbabilidades(entrada)[1]
     num_simbolos_salida = len(matrizCanal[0])
@@ -941,10 +1026,19 @@ def getProbabilidadesSimultaneasConMsg(entrada: str, salida: str) -> list:
     for i in range(len(probsPriori)):
         for j in range(num_simbolos_salida):
             probs_simultaneas[i][j] = probsPriori[i] * matrizCanal[i][j]
-
+ 
     return probs_simultaneas
 
-def getProbabilidadesSimultaneas(probsPriori: list, matrizCanal: list) -> list:
+"""
+Las probabilidades simultaneas se definen como:
+P(ai, bj)= P(ai /bj) * P(bj)= P(bj/ai) * P(ai)
+PASOS:
+1. Inicializar una matriz para las probabilidades simultáneas con ceros.
+2. Para cada par (ai, bj), calcular la probabilidad simultánea multiplicando la probabilidad a priori P(ai)
+   por la probabilidad condicional P(bj/ai) de la matriz de canal.
+3. Devolver la matriz de probabilidades simultáneas.
+"""
+def getMatrizSucesosSimultaneos(probsPriori: list[float], matrizCanal: list[list[float]]) -> list[list[float]]:
     num_simbolos_salida = len(matrizCanal[0])
     probs_simultaneas = [[0.0] * num_simbolos_salida for _ in range(len(probsPriori))]
 
@@ -954,7 +1048,15 @@ def getProbabilidadesSimultaneas(probsPriori: list, matrizCanal: list) -> list:
 
     return probs_simultaneas
 
-def getProbabilidadesAPosteriori(probsPriori: list, matrizCanal: list, probs_salida: list) -> list[list[float]]:
+"""
+Calcula las probabilidades a posteriori P(ai/bj) utilizando el teorema de Bayes:
+P(ai/bj) = ( P(bj/ai) * P(ai) ) / P(bj)
+PASOS:
+1. Inicializar una matriz para las probabilidades a posteriori con ceros.
+2. Para cada símbolo de salida bj, calcular las probabilidades a posteriori para cada símbolo de entrada ai.
+3. Devolver la matriz de probabilidades a posteriori.
+"""
+def getProbabilidadesAPosteriori(probsPriori: list[float], matrizCanal: list[list[float]], probs_salida: list[float]) -> list[list[float]]:
     num_simbolos_entrada = len(probsPriori)
     num_simbolos_salida = len(matrizCanal[0])
     probs_posteriori = [[0.0] * num_simbolos_entrada for _ in range(num_simbolos_salida)]
@@ -967,8 +1069,12 @@ def getProbabilidadesAPosteriori(probsPriori: list, matrizCanal: list, probs_sal
                 probs_posteriori[j][i] = 0.0
 
     return probs_posteriori
-
-def getEntropiasAPosteriori(probsPriori: list, matrizCanal: list) -> list:
+"""
+H (A/bj) representa el número medio de binits necesarios
+para representar un símbolo de una fuente con una probabilidad a posteriori P(ai/bj), i = 1, 2, ..., r.
+H (A/bj) =  sum_i P(ai/bj) * log2(1/P(ai/bj))
+"""
+def getEntropiasAPosteriori(probsPriori: list[float], matrizCanal: list[list[float]]) -> list[list[float]]:
     probsAPosteriori = getProbabilidadesAPosteriori(probsPriori, matrizCanal, getProbabilidadesSalida(probsPriori, matrizCanal))
     num_simbolos_salida = len(matrizCanal[0])
     entropias_posteriori = [0.0] * num_simbolos_salida
@@ -981,32 +1087,51 @@ def getEntropiasAPosteriori(probsPriori: list, matrizCanal: list) -> list:
         entropias_posteriori[j] = entropia
     return entropias_posteriori
 
-def getEquivocacionRuido(probsPriori: list, matrizCanal: list) -> float:
+"""
+Calcula la entropia media a posteriori o la equivocación (ruido) H(A/B) por definición.
+La cual mide la informacion que queda en A cuando se conoce B.
+Nro. mínimo de preguntas binarias en promedio para determinar la entrada conocida la salida
+PASOS:
+1. Calcular las probabilidades de salida P(B) usando las probabilidades a priori y la matriz de canal.
+2. Calcular las probabilidades a posteriori P(A/B) usando el teorema de Bayes.
+3. Calcular la matriz de sucesos simultáneos P(A,B).
+4. Calcular la equivocación H(A/B) sumando sobre todos los pares (ai, bj) la contribución P(ai, bj) * log2(1/P(ai/bj)).
+5. Devolver el valor de la equivocación H(A/B).
+"""
+def getEquivocacionRuido(probsPriori: list[float], matrizCanal: list[list[float]]) -> float:
     """
-    Calcula la equivocación (ruido) H(X|Y) por definición.
+    Calcula la equivocación (ruido) H(A/B) por definición.
     
     Definición:
-    H(X|Y) = sum_y P(y) * H(X|y)
-    donde H(X|y) = + sum_x P(x|y) * log2(1/P(x|y))
+    H(A/B) = sum_b P(b) * H(A/b)
+    donde H(A/b) = + sum_a P(a/b) * log2(1/P(a/b))
     
     Returns:
-        float: El valor de la equivocación H(X|Y) en bits.
+        float: El valor de la equivocación H(A/B) en bits.
     """
        
-    # --- 2. Calcular Probabilidad de Salida P(Y) ---
-    p_y = getProbabilidadesSalida(probsPriori, matrizCanal)
+    # --- 2. Calcular Probabilidad de Salida P(B) ---
+    p_b = getProbabilidadesSalida(probsPriori, matrizCanal)
     
-    # --- 3. Calcular Probabilidad "Backward" P(X|Y) ---
-    probsPosteriori = getProbabilidadesAPosteriori(probsPriori, matrizCanal, p_y)
+    # --- 3. Calcular Probabilidad "Backward" P(A/B) ---
+    probsPosteriori = getProbabilidadesAPosteriori(probsPriori, matrizCanal, p_b)
     
-    # --- 4. Calcular P(x,y) ---
-    matrizSimultaneas = getProbabilidadesSimultaneas(probsPriori, matrizCanal)
+    # --- 4. Calcular P(a,b) ---
+    matrizSimultaneas = getMatrizSucesosSimultaneos(probsPriori, matrizCanal)
     ruido = 0.0
     for i in range(len(matrizSimultaneas)):        
         for j in range(len(matrizSimultaneas[0])):
             ruido += matrizSimultaneas[i][j] * math.log2(1/probsPosteriori[j][i]) if probsPosteriori[j][i] > 0 else 0.0
     return ruido
-
+"""
+Calcula la pérdida H(B/A) por definición.
+Nro. mínimo de preguntas binarias en promedio para determinar la salida conocida la entrada.
+PASOS:
+1. Para cada símbolo de entrada ai, calcular la entropía condicional H(B/ai) utilizando la matriz de canal.
+2. Multiplicar cada entropía condicional H(B/ai) por la probabilidad a priori P(ai).
+3. Sumar todas las contribuciones para obtener la pérdida H(B/A).
+4. Devolver el valor de la pérdida H(B/A).
+"""
 def getPerdida(probsPriori: list[float], matrizCanal: list[list[float]]) -> float:
     numX = len(probsPriori)
     numY = len(matrizCanal[0])
@@ -1023,17 +1148,32 @@ def getPerdida(probsPriori: list[float], matrizCanal: list[list[float]]) -> floa
         perdida += probsPriori[i] * h_entropia_condicional
 
     return perdida
-
+"""
+Además de las entropías H(A) y H(B), puede definirse la
+entropía afín, que mide la incertidumbre del suceso simultáneo (ai, bj)
+H (A ,B)=∑ P(a ,b)log (1/P(a,b))
+PASOS:
+1. Calcular la matriz de sucesos simultáneos P(A,B) utilizando las probabilidades a priori y la matriz de canal.
+2. Calcular la entropía afín H(A,B) sumando sobre todos los pares (ai, bj) la contribución P(ai, bj) * log2(1/P(ai, bj)).
+3. Devolver el valor de la entropía afín H(A,B).
+"""
 def getEntropiaAfín(probsPriori: list[float], matrizCanal: list[list[float]]) -> float:
-    matrizSimultaneas = getProbabilidadesSimultaneas(probsPriori, matrizCanal)
+    matrizSimultaneas = getMatrizSucesosSimultaneos(probsPriori, matrizCanal)
     entropiaAfin = 0.0
     for i in range(len(matrizSimultaneas)):
         for j in range(len(matrizSimultaneas[0])):
             entropiaAfin += matrizSimultaneas[i][j] * math.log2(1/matrizSimultaneas[i][j]) if matrizSimultaneas[i][j] > 0 else 0.0
     return entropiaAfin
 
+
+"""
+I(A,B)= H(A)-H(A/B)
+I(A, B)=∑P(a , b)log(P(a/b)/P(a)) 
+Como P(ai,bj)=P(ai/bj).P(bj):
+I(A, B) = ∑ P(a,b) * log2( P(a,b) / (P(a) * P(b)) )
+"""
 def getInformacionMutua(probsPriori: list[float], matrizCanal: list[list[float]]) -> float:       
-    probsSimultaneas = getProbabilidadesSimultaneas(probsPriori, matrizCanal)
+    probsSimultaneas = getMatrizSucesosSimultaneos(probsPriori, matrizCanal)
     probsSalida = getProbabilidadesSalida(probsPriori, matrizCanal)
     informacionMutua1 = 0.0
     for i in range(len(probsPriori)):
@@ -1046,6 +1186,10 @@ def getInformacionMutua(probsPriori: list[float], matrizCanal: list[list[float]]
 
     return informacionMutua1
 
+"""
+H(A,B)=H(B)+H(A/B)
+H(A,B)=H(A)+H(B/A)
+"""
 def verificarRelaciones(probsPriori: list[float], matrizCanal: list[list[float]]) -> bool:
     entropiaPriori = getEntropia(probsPriori)
     probsSalida = getProbabilidadesSalida(probsPriori, matrizCanal)
@@ -1074,6 +1218,14 @@ def verificarRelaciones(probsPriori: list[float], matrizCanal: list[list[float]]
 #############################################
 #               TP6
 #############################################
+"""
+Verifica si un canal es sin ruido. Al observar una salida bj se conoce con certeza el símbolo ai transmitido,
+es decir las probabilidades condicionales P (ai/bj) son 0 y 1. La equivocación H (A/B) es cero.
+
+PASOS:
+1. Recorrer cada columna de la matriz del canal.
+2. Verificar que cada columna tenga exactamente un valor 1 y el resto sean 0.
+"""
 def isSinRuido(matriz: list[list[float]]) -> bool:
     """
     Verifica si un canal es sin ruido.
@@ -1087,7 +1239,14 @@ def isSinRuido(matriz: list[list[float]]) -> bool:
         if sumCol != 1:
             return False
     return True
-
+"""
+Verifica si un canal es determinante.
+El símbolo de entrada ai es suficiente para determinar, con probabilidad 1, el
+símbolo de salida bj. Por lo tanto las probabilidades P(bj/ai) han de ser 0 ó 1,. (al reves que sin ruido)
+PASOS:
+1. Recorrer cada fila de la matriz del canal.
+2. Verificar que cada fila tenga exactamente un valor 1 y el resto sean 0.
+"""
 def isDeterminante(matriz: list[list[float]]) -> bool:
     """
     Verifica si un canal es determinante.
@@ -1101,9 +1260,22 @@ def isDeterminante(matriz: list[list[float]]) -> bool:
         
     return True
 
+"""
+P (ck/bj, ai) = P (ck/bj) para cualquier i, j, k
+P (ai/bj, ck) = P (ai/bj)
+Al transmitir una información a través de dos canales en serie parece lógico
+que la equivocación aumente, es decir que H (A /C) sea mayor que H (A/B).
+Los canales tienden a “perder” información. La información que emerge
+finalmente de varios canales en serie no puede ser mayor que la que
+emergía de un punto intermedio de la serie, si se pudiera extraer de él.
+PASOS:
+1. Verificar que el número de columnas del primer canal sea igual al número de filas del segundo canal.
+2. Multiplicar las matrices de los dos canales para obtener la matriz del canal compuesto.
+
+"""
 def getCanalCompuesto(canalA: list[list[float]], canalB: list[list[float]]) -> list[list[float]]:
     """
-    Obtiene la matriz del canal compuesto de dos canales.
+    Obtiene la matriz del canal compuesto en serie de dos canales.
     El canal compuesto se obtiene multiplicando las matrices de los dos canales.
     """
     filasA = len(canalA)
@@ -1122,6 +1294,20 @@ def getCanalCompuesto(canalA: list[list[float]], canalB: list[list[float]]) -> l
                 canalCompuesto[i][j] += canalA[i][k] * canalB[k][j]        
     return canalCompuesto
 
+
+"""
+Verifica si dos columnas de la matriz se pueden combinar en una reducción suficiente.
+Dos columnas se pueden combinar si para cada fila los elementos son iguales o multiplicables.
+PASOS:
+1. Inicialiizar un vector de constantes por las que se multiplican los elementos de una columna para obtener los de la otra.
+1. Recorrer cada fila de las dos columnas especificadas.
+2. Verificar si ambos elementos son cero. Si es así, comprobar que la lista no esta vacía
+   y establecer que entonces los elementos de esta fila también son multiplicables por la misma constante.
+3. Si uno de los elementos es cero y el otro no, retornar False.
+4. Si ambos elementos son distintos de cero, calcular la constante como el cociente del segundo elemento entre el primero
+   y agregarla a la lista de constantes.
+5. Después de recorrer todas las filas, verificar si todas las constantes en la lista son iguales (ignorando ceros).
+"""
 def verificarColumnasReducibles(matriz: list[list[float]], col1: int, col2: int) -> bool:
     """
     Verifica si dos columnas de la matriz se pueden combinar en una reducción suficiente.
@@ -1158,6 +1344,17 @@ def verificarColumnasReducibles(matriz: list[list[float]], col1: int, col2: int)
 
     return True
 
+
+"""
+Genera la matriz del canal determinante para combinar 'col1' y 'col2'.
+La nueva columna combinada estará en el índice 'col1'.
+PASOS:
+1. Asegurar que col1 sea siempre la más pequeña para que sea el nuevo índice.
+2. Inicializar una nueva matriz con el número de filas igual al número de columnas de la matriz original
+   y el número de columnas igual al número de columnas de la matriz original menos uno.
+3. Mapear las dos columnas a combinar en la nueva matriz.
+4. Mapear el resto de columnas (identidad).
+"""
 def generarMatrizDeterminante(matriz: list[list[float]], col1: int, col2: int) -> list[list[float]]:
     """
     Genera la matriz del canal determinante para combinar 'col1' y 'col2'.
@@ -1198,6 +1395,15 @@ def generarMatrizDeterminante(matriz: list[list[float]], col1: int, col2: int) -
     # utils.mostrarMatriz(nuevaMatriz, f"Matriz determinante para {col1} y {col2}")
     return nuevaMatriz
 
+"""
+Realiza reducciones sucesivas suficientes en la matriz del canal hasta que no se puedan hacer más.
+PASOS:
+1. Inicializar una copia de la matriz original para realizar las reducciones.
+2. Utilizar un bucle while para continuar intentando reducciones hasta que no se puedan hacer más.
+3. Dentro del bucle while, utilizar bucles for anidados para comprobar cada par de columnas.
+4. Si se encuentra un par de columnas reducibles, generar la matriz determinante y actualizar la matriz reducida.
+5. Repetir el proceso hasta que no se puedan hacer más reducciones.
+"""
 def maxReduccion(matriz: list[list[float]]) -> list[list[float]]:
     
     matrizReducida = [fila[:] for fila in matriz]
@@ -1231,3 +1437,166 @@ def maxReduccion(matriz: list[list[float]]) -> list[list[float]]:
                 break # Rompe el bucle 'col1'        
             
     return matrizReducida
+"""
+PASOS:
+1. Tomar la primera fila de la matriz como referencia.
+2. Recorrer cada fila de la matriz, ordenarla y comparar sus elementos con los de la primera fila ordenada.
+3. Si alguna fila no coincide, retornar False.
+4. Luego, tomar la primera columna de la matriz como referencia.
+5. Recorrer cada columna de la matriz, ordenarla y comparar sus elementos con los de la primera columna ordenada.
+6. Si alguna columna no coincide, retornar False.
+"""
+def isSimetrico(matriz: list[list[float]]) -> bool:
+    """
+    En un canal simétrico los elementos de las filas y las columnas
+    son iguales pero permutados.
+    """
+    primeraFila = matriz[0]
+    for fila in matriz[1:]:
+        if sorted(fila) != sorted(primeraFila):
+            return False
+    # ahora verifico las columnas
+    primeraColumna = [matriz[i][0] for i in range(len(matriz))]
+    for j in range(1, len(matriz[0])):
+        columna = [matriz[i][j] for i in range(len(matriz))]
+        if sorted(columna) != sorted(primeraColumna):
+            return False
+    return True
+
+"""
+PASOS:
+1. Tomar la primera fila de la matriz como referencia.
+2. Recorrer cada fila de la matriz, ordenarla y comparar sus elementos con los de la primera fila ordenada.
+3. Si alguna fila no coincide, retornar False.
+"""
+def isUniforme(matriz: list[list[float]]) -> bool:
+    """
+    Un canal es uniforme si cada fila consiste en una permutación
+    arbitraria de los términos de la primera fila.
+    """
+    primeraFila = matriz[0]
+    for fila in matriz[1:]:
+        if sorted(fila) != sorted(primeraFila):
+            return False
+    return True
+
+"""
+PASOS:
+1. Verificar que la matriz tenga exactamente 2 filas y 2 columnas.
+2. Tomar la probabilidad de error de la primera fila y segunda columna.
+3. Comparar esta probabilidad con la probabilidad correspondiente en la segunda fila y primera columna.
+4. Si son iguales, retornar True; de lo contrario, retornar False.
+"""
+def isCanalBSC(matriz: list[list[float]]) -> bool:
+    """
+    Verifica si un canal es un canal BSC (Binary Symmetric Channel).
+    Un canal BSC tiene dos entradas y dos salidas, y la probabilidad de error es la misma para ambas entradas.
+    """
+    if len(matriz) != 2 or len(matriz[0]) != 2:
+        return False
+    pError = matriz[0][1]
+    if matriz[1][0] != pError:
+        return False
+    return True
+
+"""
+C=max(I( A, B))
+Calcula la capacidad del canal dado su matriz de canal.
+Si el canal no entra dentro de ninguno de los casos especiales, se debe maximizar la información mutua
+no se realiza en esta funcion.
+PASOS:
+1. Verificar si el canal es determinante, sin ruido, simétrico, uniforme o BSC.
+2. Calcular la capacidad según el tipo de canal identificado.
+3. Retornar el valor de la capacidad calculada.
+"""
+def calcCapacidad(matriz: list[list[float]]) -> float:
+    """
+    Calcula la capacidad del canal dado su matriz de transición.
+    La capacidad se define como el máximo de la información mutua sobre todas las distribuciones de probabilidad de entrada posibles.
+    """
+    numEntradas = len(matriz)
+    numSalidas = len(matriz[0])
+
+    if (isDeterminante(matriz)):
+        print("Canal determinante")
+        return math.log2(numSalidas)
+    
+    if (isSinRuido(matriz)):
+        print("Canal sin ruido")
+        return math.log2(numEntradas)
+    
+    if (isSimetrico(matriz)):
+        print("Canal simétrico")
+        # para canales simétricos tengo que obtener la entropía del canal
+        primeraFila = matriz[0]
+        return math.log2(numEntradas) - getEntropia(primeraFila)
+    
+    if (isUniforme(matriz)):
+        print("Canal uniforme")
+        # debo calcular la entropia de la primera fila
+        primeraFila = matriz[0]
+        return math.log2(numEntradas) - getEntropia(primeraFila)        
+
+    if (isCanalBSC(matriz)):
+        print("Canal BSC")
+        pError = matriz[0][1]
+        return 1 - (-pError * math.log2(pError) - (1 - pError) * math.log2(1 - pError))
+
+
+"""
+Dado un paso y una matriz de canal binario, estima la capacidad del canal binario.
+PASOS:
+1. Inicializar variables para almacenar la máxima información mutua y la probabilidad asociada.
+2. Iterar sobre las probabilidades a priori desde 0 hasta 1 con el paso especificado.
+3. Para cada probabilidad a priori, calcular la información mutua utilizando la función getInformacionMutua.
+4. Si la información mutua calculada es mayor que la máxima registrada, actualizar la máxima
+   información mutua y la probabilidad asociada.
+5. Retornar la máxima información mutua y la probabilidad asociada.
+"""
+def estimarCapacidadCanalBinario(matriz: list[list[float]], paso: float) -> tuple[float, float]:
+    """
+    Estima la capacidad de un canal binario mediante el cálculo de la información mutua
+    para un conjunto de probabilidades a priori distribuidas uniformemente según el paso especificado.
+    Retorna el valor de capacidad estimado junto con su probabilidad asociada.
+    """
+    maxInfoMutua = 0.0
+    probabilidadAsociada = 0.0
+    
+    p = 0.0
+    while p <= 1.0:
+        probsPriori = [p, 1 - p]
+        infoMutua = getInformacionMutua(probsPriori, matriz)
+        
+        if infoMutua > maxInfoMutua:
+            maxInfoMutua = infoMutua
+            probabilidadAsociada = p
+            
+        p += paso
+    
+    return maxInfoMutua, probabilidadAsociada
+
+def calcProbabilidadError(probsPriori: list[float], matriz: list[list[float]]) -> float:
+    """
+    Calcula la probabilidad de error utilizando la regla de decisión de máxima posibilidad.
+    """
+    # debo encontrar los maximos de la matriz por columna
+    numEntradas = len(matriz)
+    numSalidas = len(matriz[0])
+    indicesMaximos = [-1 for _ in range(numSalidas)]
+    for j in range(numSalidas):
+        maxVal = -1
+        indiceMax = -1
+        for i in range(numEntradas):
+            if matriz[i][j] > maxVal:
+                maxVal = matriz[i][j]
+                indiceMax = i
+        indicesMaximos[j] = indiceMax
+
+    # Calculo la probabilidad de error sumando las probabilidades excepto las de los maximos
+    probabilidadError = 0.0
+    for j in range(numSalidas):
+        for i in range(numEntradas):
+            if i != indicesMaximos[j]:
+                probabilidadError += probsPriori[i] * matriz[i][j]
+
+    return probabilidadError
