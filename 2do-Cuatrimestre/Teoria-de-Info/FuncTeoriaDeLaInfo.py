@@ -1167,10 +1167,17 @@ def getEntropiaAfín(probsPriori: list[float], matrizCanal: list[list[float]]) -
 
 
 """
+La informacion mutua es la diferencia entre la entropía a priori y la equivocación H(A/B).
+Es decir es la cantidad de informacion logra transmitirse a través del canal.
 I(A,B)= H(A)-H(A/B)
 I(A, B)=∑P(a , b)log(P(a/b)/P(a)) 
 Como P(ai,bj)=P(ai/bj).P(bj):
 I(A, B) = ∑ P(a,b) * log2( P(a,b) / (P(a) * P(b)) )
+PASOS:
+1. Calcular la matriz de sucesos simultáneos P(A,B) utilizando las probabilidades a priori y la matriz de canal.
+2. Calcular las probabilidades de salida P(B).
+3. Calcular la información mutua I(A,B) sumando sobre todos los pares (ai, bj) la contribución P(ai, bj) * log2( P(ai, bj) / (P(ai) * P(bj)) ).
+4. Devolver el valor de la información mutua I(A,B).
 """
 def getInformacionMutua(probsPriori: list[float], matrizCanal: list[list[float]]) -> float:       
     probsSimultaneas = getMatrizSucesosSimultaneos(probsPriori, matrizCanal)
@@ -1187,8 +1194,9 @@ def getInformacionMutua(probsPriori: list[float], matrizCanal: list[list[float]]
     return informacionMutua1
 
 """
-H(A,B)=H(B)+H(A/B)
-H(A,B)=H(A)+H(B/A)
+H(A,B)=H(B)+H(A/B) // la entropía afín se puede expresar como la suma de la entropía de las probabilidades de salida y la equivocación
+H(A,B)=H(A)+H(B/A) // o como la suma de la entropía a priori y la pérdida.
+
 """
 def verificarRelaciones(probsPriori: list[float], matrizCanal: list[list[float]]) -> bool:
     entropiaPriori = getEntropia(probsPriori)
@@ -1575,6 +1583,19 @@ def estimarCapacidadCanalBinario(matriz: list[list[float]], paso: float) -> tupl
     
     return maxInfoMutua, probabilidadAsociada
 
+"""
+El segundo teorema de Shannon trata de la cantidad de información sin error que puede obtenerse de un
+cierto canal.
+El valor de la probabilidad de error que corresponde al empleo de una regla de
+decisión cualquiera (por ejemplo la regla de máxima probabilidad) viene dado por:
+P(e) = ∑ P(ai) ∑ P(bj/ai) ,donde la segunda suma se extiende a todos los bj que no son
+decididos como ai.
+PASOS:
+1. Para cada columna de la matriz, encontrar el índice de la fila con el valor máximo (decisión óptima).
+2. Calcular la probabilidad de error sumando las probabilidades de todas las entradas
+   (excepto las de los máximos) y afectandola por la probabilidad a priori.
+3. Devolver la probabilidad de error calculada.
+"""
 def calcProbabilidadError(probsPriori: list[float], matriz: list[list[float]]) -> float:
     """
     Calcula la probabilidad de error utilizando la regla de decisión de máxima posibilidad.
