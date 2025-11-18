@@ -420,6 +420,56 @@ Pasos algoritmo de Huffman:
         c. CONSTRUCCIÓN DE CÓDIGOS: A los símbolos del primer grupo se les añade un '0' al inicio de su código, y a los del segundo grupo un '1'.
         d. COMBINACIÓN: Crear un nuevo símbolo que combine ambos grupos, con una probabilidad igual a la suma de las dos.
     3. RESULTADO: Al finalizar, cada símbolo tendrá un código binario único asignado.
+
+"""
+"""
+=============================================================================
+PRUEBA DE ESCRITORIO: getCodigoHuffman
+=============================================================================
+DATOS DE ENTRADA (probs): [0.5, 0.25, 0.15, 0.10]
+ÍNDICES ORIGINALES:        0     1     2     3
+
+1. INICIALIZACIÓN
+   --------------------------------------------------------------------------
+   items:   [[0.5, [0]], [0.25, [1]], [0.15, [2]], [0.10, [3]]]
+   codigos: ["", "", "", ""]
+
+2. BUCLE ITERATIVO
+   --------------------------------------------------------------------------
+   >> VUELTA 1 (len > 1)
+      Sort:    [[0.10, [3]], [0.15, [2]], [0.25, [1]], [0.5, [0]]]
+      Pop:     Menor = [0.10, [3]] (idx 3)
+               Mayor = [0.15, [2]] (idx 2)
+      Update:  codigos[3] prepende "0" -> "0"
+               codigos[2] prepende "1" -> "1"
+      Push:    [0.25, [3, 2]] (Suma de prob: 0.10 + 0.15)
+
+   >> VUELTA 2 (len > 1)
+      Sort:    [[0.25, [1]], [0.25, [3, 2]], [0.5, [0]]]
+      Pop:     Menor = [0.25, [1]]    (idx 1)
+               Mayor = [0.25, [3, 2]] (idxs 3 y 2)
+      Update:  codigos[1] prepende "0"   -> "0"
+               codigos[3] prepende "1"   -> "1" + "0" = "10"
+               codigos[2] prepende "1"   -> "1" + "1" = "11"
+      Push:    [0.5, [1, 3, 2]] (Suma: 0.25 + 0.25)
+
+   >> VUELTA 3 (len > 1)
+      Sort:    [[0.5, [0]], [0.5, [1, 3, 2]]]
+      Pop:     Menor = [0.5, [0]]       (idx 0)
+               Mayor = [0.5, [1, 3, 2]] (idxs 1, 3 y 2)
+      Update:  codigos[0] prepende "0"   -> "0"
+               codigos[1] prepende "1"   -> "1" + "0"  = "10"
+               codigos[3] prepende "1"   -> "1" + "10" = "110"
+               codigos[2] prepende "1"   -> "1" + "11" = "111"
+      Push:    [1.0, [0, 1, 3, 2]]
+
+3. RESULTADO FINAL (Retorno)
+   --------------------------------------------------------------------------
+   Índice 0 (0.50): "0"
+   Índice 1 (0.25): "10"
+   Índice 2 (0.15): "111"
+   Índice 3 (0.10): "110"
+=============================================================================
 """
 def getCodigoHuffman(probs: list) -> list:
     """
@@ -467,11 +517,78 @@ def getCodigoHuffman(probs: list) -> list:
     return codigos
 
 """
+Toma el techo de la longitud mediia como la entropia del codigo + 2, en lugar de más de 1 como en el teorema de Shannon.
 Pasos algoritmo de Shannon-Fano:
     1. ORDENAR: Ordenar los símbolos en orden descendente según sus probabilidades.
     2. DIVIDIR: Dividir la lista en dos grupos, de modo que la suma de las probabilidades de cada grupo sea lo más cercana posible.
     3. ASIGNAR CÓDIGOS: Asignar un '0' a todos los símbolos del primer grupo y un '1' a los del segundo grupo.
     4. RECURSIVIDAD: Aplicar recursivamente el proceso a cada grupo hasta que cada símbolo tenga un código único.
+"""
+"""
+=============================================================================
+EJEMPLO DE EJECUCIÓN: getCodigoShannonFano
+=============================================================================
+DATOS DE ENTRADA (probs): [0.4, 0.3, 0.2, 0.1]
+ÍNDICES ORIGINALES:        0    1    2    3
+
+NOTA SOBRE PREFIJOS EN ESTE CÓDIGO:
+- Grupo Superior (codigos1) se le asigna prefijo "1".
+- Grupo Inferior (codigos2) se le asigna prefijo "0".
+
+-----------------------------------------------------------------------------
+NIVEL 0 (Raíz): [0.4, 0.3, 0.2, 0.1] | Total = 1.0
+-----------------------------------------------------------------------------
+1. ORDENAR (Descendente): Ya están ordenados.
+2. BUSCAR PUNTO DE CORTE (Donde |SumaIzq - SumaDer| sea mínima):
+   - Corte tras 0.4: Izq(0.4) vs Der(0.6) -> Dif = 0.2  <-- ¡MEJOR CORTE!
+   - Corte tras 0.7: Izq(0.7) vs Der(0.3) -> Dif = 0.4
+
+3. DIVISIÓN Y RECURSIÓN:
+   > GRUPO 1 (Superior): [0.4]
+     - Caso base (len=1): Retorna [""]
+     - Asignar bit: Se añade "1". Resultado parcial: ["1"]
+
+   > GRUPO 2 (Inferior): [0.3, 0.2, 0.1] (Llamada Recursiva - Ver Nivel 1)
+     - Recibe de la recursión: ["1", "01", "00"]
+     - Asignar bit: Se añade "0" a todo.
+     - Resultado parcial: ["01", "001", "000"]
+
+-----------------------------------------------------------------------------
+NIVEL 1 (Procesando el Grupo Inferior del Nivel 0): [0.3, 0.2, 0.1] | Total = 0.6
+-----------------------------------------------------------------------------
+1. BUSCAR PUNTO DE CORTE:
+   - Corte tras 0.3: Izq(0.3) vs Der(0.3) -> Dif = 0.0 <-- ¡PERFECTO!
+
+2. DIVISIÓN Y RECURSIÓN:
+   > SUB-GRUPO A (Superior): [0.3]
+     - Caso base: Retorna [""]
+     - Asignar bit: Se añade "1". Resultado: ["1"]
+
+   > SUB-GRUPO B (Inferior): [0.2, 0.1] (Llamada Recursiva - Ver Nivel 2)
+     - Recibe de la recursión: ["1", "0"]
+     - Asignar bit: Se añade "0" a todo.
+     - Resultado: ["01", "00"]
+
+-----------------------------------------------------------------------------
+NIVEL 2 (Procesando el Sub-Grupo B del Nivel 1): [0.2, 0.1] | Total = 0.3
+-----------------------------------------------------------------------------
+1. BUSCAR PUNTO DE CORTE:
+   - Corte tras 0.2: Izq(0.2) vs Der(0.1) -> Dif = 0.1
+
+2. DIVISIÓN:
+   > HOJA SUP (0.2): Retorna [""] -> Añade "1" -> ["1"]
+   > HOJA INF (0.1): Retorna [""] -> Añade "0" -> ["0"]
+
+-----------------------------------------------------------------------------
+RECONSTRUCCIÓN FINAL (Mapeo a índices originales)
+-----------------------------------------------------------------------------
+Se combinan los resultados de las llamadas recursivas en el orden original:
+
+Índice 0 (0.4) -> "1"
+Índice 1 (0.3) -> "01"
+Índice 2 (0.2) -> "001"
+Índice 3 (0.1) -> "000"
+=============================================================================
 """
 def getCodigoShannonFano(probs: list) -> list:
     # Caso base: si solo hay un elemento, no hay más divisiones que hacer.
@@ -706,6 +823,9 @@ def decodeMessage(alfabeto: list, codigo: list, byte_array: bytearray) -> str:
     
     return mensajeDecodificado
 
+"""
+La tasa de compresión mide que tan grande era el mensaje original en comparación con su versión comprimida.
+"""
 def calcularTasaCompresion(mensaje: str, mensajeCodificado: bytearray) -> float:
     tamanio_original = len(mensaje) * 8; # Tamaño en bits del mensaje original
     tamanio_codificado = len(mensajeCodificado) * 8; # Tamaño en bits del mensaje codificado
@@ -1081,6 +1201,11 @@ def getProbabilidadesAPosteriori(probsPriori: list[float], matrizCanal: list[lis
 H (A/bj) representa el número medio de binits necesarios
 para representar un símbolo de una fuente con una probabilidad a posteriori P(ai/bj), i = 1, 2, ..., r.
 H (A/bj) =  sum_i P(ai/bj) * log2(1/P(ai/bj))
+Incertidumbre promedio sobre la entradas al conocer las salidas
+PASOS:
+1. Calcular las probabilidades a posteriori P(ai/bj) utilizando el teorema de Bayes.
+2. Para cada símbolo de salida bj, calcular la entropía condicional H(A/bj) sumando las contribuciones de todas las entradas ai.
+3. Devolver la lista de entropías condicionales H(A/bj).
 """
 def getEntropiasAPosteriori(probsPriori: list[float], matrizCanal: list[list[float]]) -> list[list[float]]:
     probsAPosteriori = getProbabilidadesAPosteriori(probsPriori, matrizCanal, getProbabilidadesSalida(probsPriori, matrizCanal))
@@ -1096,9 +1221,13 @@ def getEntropiasAPosteriori(probsPriori: list[float], matrizCanal: list[list[flo
     return entropias_posteriori
 
 """
+Promedio de las incertidumbres de las entradas al conocer las salidas.
 Calcula la entropia media a posteriori o la equivocación (ruido) H(A/B) por definición.
 La cual mide la informacion que queda en A cuando se conoce B.
 Nro. mínimo de preguntas binarias en promedio para determinar la entrada conocida la salida
+Pueden haber valores de salida que nno see correspondan a una entrada. Een ese caso de las agrupa
+como b = * y como consecuencia la entropía sobre la entrada aumenta H(A/b=*) > H(A)
+La equivocacón será siempre menor que la entropía a priori H(A) ya que conocer B reduce la incertidumbre sobre A.
 PASOS:
 1. Calcular las probabilidades de salida P(B) usando las probabilidades a priori y la matriz de canal.
 2. Calcular las probabilidades a posteriori P(A/B) usando el teorema de Bayes.
@@ -1134,6 +1263,7 @@ def getEquivocacionRuido(probsPriori: list[float], matrizCanal: list[list[float]
 """
 Calcula la pérdida H(B/A) por definición.
 Nro. mínimo de preguntas binarias en promedio para determinar la salida conocida la entrada.
+Mide la distorsión que el canal introduce en la información transmitida.
 PASOS:
 1. Para cada símbolo de entrada ai, calcular la entropía condicional H(B/ai) utilizando la matriz de canal.
 2. Multiplicar cada entropía condicional H(B/ai) por la probabilidad a priori P(ai).
@@ -1516,6 +1646,7 @@ def isCanalBSC(matriz: list[list[float]]) -> bool:
     return True
 
 """
+Es la maxima tasa a la que se puede trannsmitir información de manera confiable a través de ese canal
 C=max(I( A, B))
 Calcula la capacidad del canal dado su matriz de canal.
 Si el canal no entra dentro de ninguno de los casos especiales, se debe maximizar la información mutua
@@ -1524,6 +1655,10 @@ PASOS:
 1. Verificar si el canal es determinante, sin ruido, simétrico, uniforme o BSC.
 2. Calcular la capacidad según el tipo de canal identificado.
 3. Retornar el valor de la capacidad calculada.
+Si intentas transmitir datos a una velocidad mayor que la capacidad,
+es matemáticamente imposible reconstruir el mensaje sin errores.
+Si transmites por debajo de C, Shannon demostró que siempre existe
+un código lo suficientemente inteligente para corregir casi todos los errores.
 """
 def calcCapacidad(matriz: list[list[float]]) -> float:
     """
