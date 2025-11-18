@@ -1627,6 +1627,8 @@ def isUniforme(matriz: list[list[float]]) -> bool:
     return True
 
 """
+Si el canal es BSC y la probabilidad de error es 1 se pueden invertir los bits recibidos para
+recuperar la información original sin errores.
 PASOS:
 1. Verificar que la matriz tenga exactamente 2 filas y 2 columnas.
 2. Tomar la probabilidad de error de la primera fila y segunda columna.
