@@ -1,4 +1,5 @@
 import math
+import FuncTeoriaDeLaInfo as util
 
 def getAlfabetoyProbabilidades(cadena):
     alfabeto = list()
@@ -83,23 +84,25 @@ def max_vector(vector):
 def diferencia(v1,v2):
     return [abs(v1[i]-v2[i]) for i in range(len(v1))]
 
-def getVecEstacionarioMat(matriz,n): 
-    v0 = [1/n]*n
-    v1 = [0]*n
-    nuevo_v0 = [0]*n
-    limite = 0.00001
-    while (limite<max_vector(diferencia(v0,v1))):
-        v1=v0
-        for i in range(n):
-            aux=0
-            for j in range(n):
-                aux+=matriz[i][j]*v0[j]
-            nuevo_v0[i]=aux
-        v0=nuevo_v0
-    return v0    
+def getVecEstacionarioMat(matriz): 
+    # Inicializar vector estacionario suponiendo equiprobabilidad
+    vec_est = [];
+    for i in range(len(matriz)): # Len devuelve el numero de filas
+        vec_est.append(1/len(matriz));
+    vec_est_nuevo = [0] * len(matriz); # Inicializo todo el vector auxiliar en 0
+
+    # Iterar hasta convergencia
+    iteraciones = 100;
+    for k in range(iteraciones):
+        for i in range(len(matriz)):
+            vec_est_nuevo[i] = 0;
+            for j in range(len(matriz)):
+                vec_est_nuevo[i] += vec_est[j] * matriz[i][j];
+        vec_est = vec_est_nuevo[:]; # Hago una copia para no tener referencias
+    return vec_est;    
 msg1 = "+-/+/-//-/*-/**-*---////-+--*+*/-----/--+/++--*/-+"
 
-alfabeto1,dist_prob1 =getAlfabetoyProbabilidades(msg1)
+alfabeto1,dist_prob1 = util.getAlfabetoyProbabilidades(msg1)
 
 print("Distribucion de probabilidades mensaje 1: ",dist_prob1)
 
@@ -124,18 +127,18 @@ print("--------------------------------------------")
 
 msg2 = "-+-+*//++///*/-////+---////-+/+--+-+/-/+-+/-+*++//"
 
-alfabeto2,dist_prob2 = getAlfabetoyProbabilidades(msg2)
+alfabeto2,dist_prob2 = util.getAlfabetoyProbabilidades(msg2)
 print("Alfabeto mensaje 2: ",alfabeto2)
 print("Distribucion de probabilidades mensaje 2: ",dist_prob2)
 
-matMsg2 = getMatriz(alfabeto2,msg2)
+matMsg2 = util.getMatriz(alfabeto2,msg2)
 
 print("Matriz de mensaje 2:")
 
 print(matMsg2)
 
 print("Es memoria nula: ",isMemoriaNula(matMsg2,0.01))
+# debo calcular la entropia con la matriz
+print("Vector estacionario mensaje 2: ",util.getVecEstacionarioMat(matMsg2))
 
-print("Entropia msg2: ",getEntropia(dist_prob2))
-
-print("Vector estacionario mensaje 2: ",getVecEstacionarioMat(matMsg2,len(matMsg2)))
+print("Entropia msg2: ",util.calcularEntropiaFuenteMarkov(matMsg2,util.getVecEstacionarioMat(matMsg2)))

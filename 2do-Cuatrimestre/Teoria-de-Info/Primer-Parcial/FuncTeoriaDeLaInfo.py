@@ -100,20 +100,21 @@ def diferencia(v1,v2):
 #Calculo el vector estacionario (Aproximacion) a partir de la matriz
 
 def getVecEstacionarioMat(matriz): 
-    n = len(matriz) 
-    v0 = [1/n]*n
-    v1 = [0]*n
-    nuevo_v0 = [0]*n
-    limite = 0.00001
-    while (limite<max_vector(diferencia(v0,v1))):
-        v1=v0
-        for i in range(n):
-            aux=0
-            for j in range(n):
-                aux+=matriz[i][j]*v0[j]
-            nuevo_v0[i]=aux
-        v0=nuevo_v0
-    return v0
+    # Inicializar vector estacionario suponiendo equiprobabilidad
+    vec_est = [];
+    for i in range(len(matriz)): # Len devuelve el numero de filas
+        vec_est.append(1/len(matriz));
+    vec_est_nuevo = [0] * len(matriz); # Inicializo todo el vector auxiliar en 0
+
+    # Iterar hasta convergencia
+    iteraciones = 100;
+    for k in range(iteraciones):
+        for i in range(len(matriz)):
+            vec_est_nuevo[i] = 0;
+            for j in range(len(matriz)):
+                vec_est_nuevo[i] += vec_est[j] * matriz[i][j];
+        vec_est = vec_est_nuevo[:]; # Hago una copia para no tener referencias
+    return vec_est;    
 
 ##
 # La distribucion de probabilidad de los simbolos en la fuente en el vector t va variando con la evolucion del proceso de emision de simbolos. 
@@ -317,7 +318,10 @@ def getAlfabetoCodigo(codigo):
 
 # Devuelve una lista con las longitudes de cada palabra codigo
 def getLongitudesPalabrasCod(codigo): 
-    return [len(cod) for cod in codigo];
+    longitud = list()
+    for palabra in codigo:
+        longitud.append(len(palabra))
+    return longitud
 
 
 # Devuelve el valor de realizar la Sumatoria de la Inecuacion de Kraft
@@ -345,20 +349,25 @@ def getEntropiaCodigoR(codigo, probabilidad):
 
 # Calculo la longitud media del codigo
 def getLongitudMedia(palabras_codigo, probabilidad): 
-    return sum([p * l for p, l in zip(probabilidad, getLongitudesPalabrasCod(palabras_codigo))]);
+    l = 0
+    for i in range(len(palabras_codigo)):
+        l += probabilidad[i]*len(palabras_codigo[i])
+    return l
 
 
 # Dadas las palabras codigo y sus probabilidades se determina si este es compacto mediante 
 # el uso de que la Longitud de la palabra codigo sea menor igual a su Informacion otorgada
 def isCompacto(palabras_codigo, probabilidad): 
-    if not isInstantaneo(palabras_codigo):
-        return False;
-    r = len(getAlfabetoCodigo(palabras_codigo));
-    longitudes = getLongitudesPalabrasCod(palabras_codigo);
-    for i in range(len(palabras_codigo)):
-        if longitudes[i] > math.ceil(math.log(1/probabilidad[i], r)):
-            return False;
-    return True;
+    alfabeto = getAlfabetoCodigo(palabras_codigo)
+    r = len(alfabeto)
+    bandera = False
+    if (isInstantaneo(palabras_codigo)):
+        bandera=True
+        for elemento,prob in zip(palabras_codigo,probabilidad):
+            if(not(len(elemento)<=math.ceil(math.log(1/prob,r)))):
+                bandera = False
+                break
+    return bandera
 
 
 # Genera un mensaje codificado a partir de las palabras codigo

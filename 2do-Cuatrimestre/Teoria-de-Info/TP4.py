@@ -331,10 +331,11 @@ msgB = "AOEAOEOOOOEOAOEOOEOOEOAOAOEOEUUUIEOEOEO"
 
 _,probsA = ut.getAlfabetoyProbabilidades(msgA)
 _,probsB = ut.getAlfabetoyProbabilidades(msgB)
-
+print(f"Probabilidades fuente A: {probsA}")
 codigoA_huff = getCodigoHuffman(probsA)
 print(f"Código Huffman A: {codigoA_huff}")
 codigoB_huff = getCodigoHuffman(probsB)
+print(f"Probabilidades fuente B: {probsB}")
 print(f"Código Huffman B: {codigoB_huff}")
 codigoA_sf = getCodigoShannonFano(probsA)
 print(f"Código Shannon-Fano A: {codigoA_sf}")

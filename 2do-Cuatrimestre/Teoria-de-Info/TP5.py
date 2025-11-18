@@ -104,6 +104,20 @@ print("Ejercicio 4")
 las entradas, obtener las probabilidades de salida, a posteriori y de los eventos
 simultáneos. Analizar los resultados obtenidos.
 '''
+probsPriori = [0.5, 0.5]
+matrizCanal_binario = [
+    [1.0, 0.0],
+    [0.0, 1.0]
+]  # Canal sin ruido
+salidas = ut.getProbabilidadesSalida(probsPriori, matrizCanal_binario)
+posteriori = ut.getProbabilidadesAPosteriori(probsPriori, matrizCanal_binario, salidas)
+simultaneas = ut.getMatrizSucesosSimultaneos(probsPriori, matrizCanal_binario)
+print("Probabilidades de salida:")
+for i, prob in enumerate(salidas):
+    print(f"P(salida={i}) = {prob:.4f}")
+print("Probabilidades a posteriori:")
+ut.mostrarMatriz(posteriori, "P(entrada|salida)")
+ut.mostrarMatriz(simultaneas, "P(entrada,salida)")
 print("--------------------------------------------------------")
 
 print("Ejercicio 5")

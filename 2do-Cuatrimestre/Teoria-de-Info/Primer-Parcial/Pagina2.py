@@ -1,4 +1,5 @@
 import math
+import FuncTeoriaDeLaInfo as util
 
 def getAlfabetoCodigo(codigo): 
     alfabeto = set()
@@ -17,10 +18,7 @@ def getEntropiaCodigoR(codigo, probabilidad):
     return s
 
 def getLongitudMedia(palabras_codigo, probabilidad): 
-    l = 0
-    for i in range(len(palabras_codigo)):
-        l += probabilidad[i]*len(palabras_codigo[i])
-    return l
+    return sum([p * l for p, l in zip(probabilidad, getLongitudesPalabrasCod(palabras_codigo))]);
 
 def getKraft(alfabeto,longitud): 
     sumatoria = 0
@@ -29,10 +27,7 @@ def getKraft(alfabeto,longitud):
     return sumatoria # Si esta es <= 1 entonces existe un codigo Instantaneo con estas longitudes
 
 def getLongitudesPalabrasCod(codigo): 
-    longitud = list()
-    for palabra in codigo:
-        longitud.append(len(palabra))
-    return longitud
+    return [len(cod) for cod in codigo];
 
 # Un codigo es no singular si todas sus palabras codigo son distintas. Va a ser decodificable pero puede ser ambiguo
 def isNoSingular(codigo):
@@ -81,16 +76,14 @@ def isUnivoco(codigo): # Algoritmo de Sardinas-Patterson
   return respuesta
 
 def isCompacto(palabras_codigo, probabilidad): 
-    alfabeto = getAlfabetoCodigo(palabras_codigo)
-    r = len(alfabeto)
-    bandera = False
-    if (isInstantaneo(palabras_codigo)):
-        bandera=True
-        for elemento,prob in zip(palabras_codigo,probabilidad):
-            if(not(len(elemento)<=math.ceil(math.log(1/prob,r)))):
-                bandera = False
-                break
-    return 
+    if not isInstantaneo(palabras_codigo):
+        return False;
+    r = len(getAlfabetoCodigo(palabras_codigo));
+    longitudes = getLongitudesPalabrasCod(palabras_codigo);
+    for i in range(len(palabras_codigo)):
+        if longitudes[i] > math.ceil(math.log(1/probabilidad[i], r)):
+            return False;
+    return True;
 
 dist_prob1 = [0.15,0.25,0.05,0.45,0.1]
 cod1 = ["/+","*","+-","-"]
@@ -102,7 +95,7 @@ print("Entropia codigo 1: ",getEntropiaCodigoR(cod1,dist_prob1))
 
 print("Longitud media codigo 1: ",getLongitudMedia(cod1,dist_prob1))
 
-print("Inecuacion Kraft-Mc Millan: ",getKraft(alfabetoCod1,getLongitudesPalabrasCod(cod1)))
+print("Inecuacion Kraft-Mc Millan: ",getKraft(cod1,getLongitudesPalabrasCod(cod1)))
 
 print("El codigo es no singular: ",isNoSingular(cod1))
 print("El codigo es unequivoco: ",isUnivoco(cod1))
