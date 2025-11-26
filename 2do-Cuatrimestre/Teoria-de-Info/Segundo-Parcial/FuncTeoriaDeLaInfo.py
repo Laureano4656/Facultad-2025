@@ -1002,7 +1002,7 @@ def byteArrayToStringWithParity(byte_array: bytearray) -> str:
             print(f"Error en paridad longitudinal en columna {j}")
             errors += 1
             posiciones_error.append((j, j))  # 'L' para longitudinal
-    print(f"Errores detectados hasta ahora: {errors}")
+
     # Verificar la paridad VRC
     for i in range(1, len(matriz)):  # Empiezo desde 1 para saltar la fila de paridad VRC
         fila = matriz[i][:-1]  # Saco la última columna que es la de paridad
@@ -1010,7 +1010,7 @@ def byteArrayToStringWithParity(byte_array: bytearray) -> str:
         parity_bit = cantidad_1s % 2        
         if parity_bit != matriz[i][-1]:  # Si la paridad no es correcta
             if posiciones_error.count((i, i)) <= 0:  # Si no se detectó un error longitudinal en esta fila
-                #errors += 1
+                errors += 1
                 print(f"Error en paridad VRC en fila {i}")
                 if errors > 1:
                     return ""  # No se puede corregir el error
@@ -1020,7 +1020,7 @@ def byteArrayToStringWithParity(byte_array: bytearray) -> str:
             codigo_ascii = ''.join([str(bit) for bit in fila])  # Convierto la lista de enteros a un string
             caracter = chr(int(codigo_ascii, 2))  # Convierto el codigo ASCII a un caracter
             original_message += caracter
-    print(f"Cantidad de errores detectados: {errors}")
+    
     # Corregir errores si es posible
     if errors == 1:
         error_pos = posiciones_error[0]
