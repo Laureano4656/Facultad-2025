@@ -26,16 +26,28 @@ def calcTransitions(msg, alphabet, i, j):
     return transitions
 
 def getMatriz(alphabet,msg):
-  n = len(alphabet)
-  cantAlph = []
-  for alph in alphabet:
-    cantAlph.append(msg.count(alph))
-  M = [[0] * n for _ in range(n)]
-  cantAlph[alphabet.index(msg[len(msg)-1])] -=1
-  for j in range(n):
+    n = len(alphabet);
+    mat = [];
+
+    # Inicializo la matriz en 0
     for i in range(n):
-      M[i][j] = calcTransitions(msg,alphabet,i,j) / cantAlph[i]
-  return M
+        mat.append([0] * n);
+
+    for j in alphabet:
+        for i in alphabet:
+            aux = j + i;
+            for k in range(len(msg) - 1):
+                if msg[k] + msg[k + 1] == aux:
+                    mat[alphabet.index(i)][alphabet.index(j)] += 1;
+    
+    for j in range(n):
+        sum = 0;
+        for i in range(n):
+            sum += mat[i][j];
+        if sum != 0:
+            for i in range(n):
+                mat[i][j] = mat[i][j] / sum;
+    return mat;
 
 def isMemoriaNula(matriz,tolerancia): 
     maxima_dif = []
@@ -92,14 +104,30 @@ def getVecEstacionarioMat(matriz):
     vec_est_nuevo = [0] * len(matriz); # Inicializo todo el vector auxiliar en 0
 
     # Iterar hasta convergencia
-    iteraciones = 100;
+    iteraciones = 100000;
     for k in range(iteraciones):
         for i in range(len(matriz)):
             vec_est_nuevo[i] = 0;
             for j in range(len(matriz)):
                 vec_est_nuevo[i] += vec_est[j] * matriz[i][j];
         vec_est = vec_est_nuevo[:]; # Hago una copia para no tener referencias
-    return vec_est;    
+    return vec_est;
+  
+def getVecEstacionarioMat2(matriz): 
+    n = len(matriz) 
+    v0 = [1/n]*n
+    v1 = [0]*n
+    nuevo_v0 = [0]*n
+    limite = 0.1
+    while (limite<max_vector(diferencia(v0,v1))):
+        v1=v0
+        for i in range(n):
+            aux=0
+            for j in range(n):
+                aux+=matriz[i][j]*v0[j]
+            nuevo_v0[i]=aux
+        v0=nuevo_v0
+    return v0
 msg1 = "+-/+/-//-/*-/**-*---////-+--*+*/-----/--+/++--*/-+"
 
 alfabeto1,dist_prob1 = util.getAlfabetoyProbabilidades(msg1)
@@ -113,7 +141,8 @@ print("Alfabeto mensaje 1: ",alfabeto1)
 print("Es memoria nula: ",isMemoriaNula(matMsg1,0.01))
 
 print("Matriz mensaje 1")
-print(matMsg1)
+for fila in matMsg1:
+    print(fila)
 
 print("Entropia msg1: ",getEntropia(dist_prob1))
 
@@ -131,14 +160,15 @@ alfabeto2,dist_prob2 = util.getAlfabetoyProbabilidades(msg2)
 print("Alfabeto mensaje 2: ",alfabeto2)
 print("Distribucion de probabilidades mensaje 2: ",dist_prob2)
 
-matMsg2 = util.getMatriz(alfabeto2,msg2)
+matMsg2 = getMatriz(alfabeto2,msg2)
 
 print("Matriz de mensaje 2:")
 
-print(matMsg2)
+for fila in matMsg2:
+    print(fila)
 
 print("Es memoria nula: ",isMemoriaNula(matMsg2,0.01))
 # debo calcular la entropia con la matriz
-print("Vector estacionario mensaje 2: ",util.getVecEstacionarioMat(matMsg2))
+print("Vector estacionario mensaje 2: ",getVecEstacionarioMat(matMsg2))
 
-print("Entropia msg2: ",util.calcularEntropiaFuenteMarkov(matMsg2,util.getVecEstacionarioMat(matMsg2)))
+print("Entropia msg2: ",util.calcularEntropiaFuenteMarkov(matMsg2,getVecEstacionarioMat(matMsg2)))

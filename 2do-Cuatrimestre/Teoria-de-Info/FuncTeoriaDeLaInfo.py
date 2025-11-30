@@ -100,20 +100,21 @@ def diferencia(v1,v2):
 #Calculo el vector estacionario (Aproximacion) a partir de la matriz
 
 def getVecEstacionarioMat(matriz): 
-    n = len(matriz) 
-    v0 = [1/n]*n
-    v1 = [0]*n
-    nuevo_v0 = [0]*n
-    limite = 0.00001
-    while (limite<max_vector(diferencia(v0,v1))):
-        v1=v0
-        for i in range(n):
-            aux=0
-            for j in range(n):
-                aux+=matriz[i][j]*v0[j]
-            nuevo_v0[i]=aux
-        v0=nuevo_v0
-    return v0
+       # Inicializar vector estacionario suponiendo equiprobabilidad
+    vec_est = [];
+    for i in range(len(matriz)): # Len devuelve el numero de filas
+        vec_est.append(1/len(matriz));
+    vec_est_nuevo = [0] * len(matriz); # Inicializo todo el vector auxiliar en 0
+
+    # Iterar hasta convergencia
+    iteraciones = 100;
+    for k in range(iteraciones):
+        for i in range(len(matriz)):
+            vec_est_nuevo[i] = 0;
+            for j in range(len(matriz)):
+                vec_est_nuevo[i] += vec_est[j] * matriz[i][j];
+        vec_est = vec_est_nuevo[:]; # Hago una copia para no tener referencias
+    return vec_est;
 
 ##
 # La distribucion de probabilidad de los simbolos en la fuente en el vector t va variando con la evolucion del proceso de emision de simbolos. 
@@ -191,7 +192,7 @@ def getMatriz(alphabet,msg):
             sum += mat[i][j];
         if sum != 0:
             for i in range(n):
-                mat[i][j] = round(mat[i][j] / sum, 2);
+                mat[i][j] = mat[i][j] / sum;
     return mat;
 ##
 # Si la cadena dada es lo suficientemente larga, la matriz de transicion de estados generada a partir de ella sera una buena aproximacion de la matriz real de la fuente.
@@ -244,6 +245,7 @@ def isNoSingular(codigo):
   i = 0
   while (i<len(codigo) and codigo.count(codigo[i])==1):
     i+=1
+  print(i)
   return i==len(codigo)
 
 # Un codigo es instantaneo si ninguna palabra codigo es prefijo de otra palabra codigo. Puede decodificarse a medida que se recibe cada simbolo
@@ -265,7 +267,7 @@ def isUnivoco(codigo): # Algoritmo de Sardinas-Patterson
   i = 0 # Numero de Iteraciones
   seguir = True
   while seguir:
-      print(S[i])
+      #print(S[i])
       for x in S[0]: # Siempre comparo con el codigo
           for y in S[i]: # En S[i] se guarda el conjunto el cual debo comparar con S[0]
               if x.startswith(y) and x != y:

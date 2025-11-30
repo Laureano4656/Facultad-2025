@@ -86,7 +86,7 @@ def isCompacto(palabras_codigo, probabilidad):
     return True;
 
 dist_prob1 = [0.15,0.25,0.05,0.45,0.1]
-cod1 = ["/+","*","+-","-"]
+cod1 = ["/+","*","+-","-","*/"]
 alfabetoCod1 = getAlfabetoCodigo(cod1)
 
 print("Alfabeto codigo 1: ",alfabetoCod1)
