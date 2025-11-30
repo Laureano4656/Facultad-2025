@@ -28,13 +28,6 @@ def getInformacion(probabilidades: list[float]) -> list[float]:
     return info
 
 """
- Que pasa si se quiere calcular la entropia de una fuente con solo un simbolo?
- En este caso, la entropia seria 0, ya que no hay incertidumbre sobre el simbolo que se va a emitir.
- 
- Cual es la maxima entropia posible de una fuente con n simbolos?
- La maxima entropia posible de una fuente con n simbolos es log2(n), que ocurre cuando todos los simbolos tienen la misma probabilidad de ocurrencia (1/n).
- Esto debido a que todos los simbolos son igualmente probables, lo que maximiza la incertidumbre.
-
 Entropia de la fuente calculada a partir de las probabilidades de sus simbolos. El valor medio de la información por símbolo suministrada por la fuente
  H = sum(P*I) para cada simbolo
  La entropia mide la incertidumbre promedio asociada a la fuente de informacion.
@@ -44,11 +37,6 @@ Entropia de la fuente calculada a partir de las probabilidades de sus simbolos. 
  Itero sobre cada par de informacion y probabilidad usando zip
  Para cada par, multiplico la informacion por la probabilidad y la sumo a H
  Devuelvo el valor total de H como la entropia de la fuente
-
-# Explicacion:
-Posteriormente para calcular la entropía se obtiene, en primera instancia, la cantidad de información aportada por cada símbolo de la siguiente manera:
-Se inicializa una lista vacía para almacenar la información de cada símbolo, se itera sobre cada probabilidad en la lista de probabilidades pasada por parámetro y para cada probabilidad, si es mayor a 0, calculo la información usando la formula I = log2(1/P) y la agrego a la lista.
-Luego para calcular la entropía se utiliza este vector que contiene la información por símbolo, se inicializa la variable H en 0 para almacenar la entropía total, se itera sobre cada par de información y probabilidad multiplicando la información por la probabilidad y sumándosela a H para luego devolver el valor total de H.
 """
 def getEntropia(probabilidades): 
     info = getInformacion(probabilidades)
@@ -58,6 +46,12 @@ def getEntropia(probabilidades):
     return H
 """
 
+ Que pasa si se quiere calcular la entropia de una fuente con solo un simbolo?
+ En este caso, la entropia seria 0, ya que no hay incertidumbre sobre el simbolo que se va a emitir.
+ 
+ Cual es la maxima entropia posible de una fuente con n simbolos?
+ La maxima entropia posible de una fuente con n simbolos es log2(n), que ocurre cuando todos los simbolos tienen la misma probabilidad de ocurrencia (1/n).
+ Esto debido a que todos los simbolos son igualmente probables, lo que maximiza la incertidumbre.
 
  Genero el alfabeto y las probabilidades de sus simbolos dada una cadena
  PASOS:
@@ -68,10 +62,6 @@ def getEntropia(probabilidades):
  Si no esta, lo agrego al alfabeto y inicializo su contador en 1
  Despues de contar todas las apariciones, calculo las probabilidades dividiendo el numero de apariciones de cada simbolo por la longitud total de la cadena
  Finalmente, ordeno el alfabeto y las probabilidades en base al alfabeto para mantener un orden consistente
-
-###
-# Explicacion:
-Para obtener el alfabeto y las probabilidades de una fuente a partir de un mensaje se inicializo dos listas vacías: "alfabeto" para almacenar los símbolos únicos y "apariciones" para contar las ocurrencias de cada símbolo. Luego se iteró sobre cada símbolo en la cadena dada. Para cada símbolo se verificó si ya estaba en el alfabeto, si esta, incremento su contador de apariciones en la lista apariciones, si no esta, lo agrego al alfabeto y inicializo su contador en 1. Luego de contar todas las apariciones, calculo las probabilidades dividiendo el numero de apariciones de cada símbolo por la longitud total de la cadena. Finalmente, ordeno el alfabeto y las probabilidades en base al alfabeto para mantener un orden consistente.s
 """
 def getAlfabetoyProbabilidades(cadena) -> tuple[list[str], list[float]]: 
     alfabeto = list()
@@ -130,9 +120,6 @@ Calculo extensiones de grado N a partir de la fuente y de las probabilidades
  Para cada simbolo en la extension anterior, itero sobre cada simbolo en la fuente original
  Creo una nueva combinacion concatenando el simbolo de la extension anterior con el simbolo de la fuente original
  Calculo la nueva probabilidad multiplicando las probabilidades correspondientes
-
-# Explicacion:
-Luego para obtener la extension de orden N de la fuente se realiza un procedimiento recursivo en el que si n es 1, retorno la fuente y las probabilidades originales, si n es mayor que 1, inicializo dos listas vacías: nueva_fuente y nuevas_probabilidades. Posteriormente llamo recursivamente a la función con n-1 para obtener la extension anterior. Itero sobre cada símbolo en la extension anterior a su vez se itera sobre cada símbolo de la fuente original para crear una combinación concatenando el símbolo de la extension anterior con el símbolo de la fuente original. Luego se calcula la nueva probabilidad multiplicando las probabilidades correspondientes.
 """
 def calcExtensionN(fuente: list[str], probabilidades: list[float], n: int) -> tuple[list[str], list[float]]: 
     if n == 1:
@@ -155,68 +142,6 @@ def max_vector(vector):
 def diferencia(v1,v2):
     return [abs(v1[i]-v2[i]) for i in range(len(v1))]
 
-def multiplicar_matrices(A, B):
-    """
-    Multiplica dos matrices A y B sin usar numpy.
-    """
-    filas_A = len(A)
-    cols_A = len(A[0])
-    filas_B = len(B)
-    cols_B = len(B[0])
-
-    if cols_A != filas_B:
-        raise ValueError("Las dimensiones no coinciden para multiplicar.")
-
-    # Crear matriz resultado llena de ceros
-    C = [[0.0 for _ in range(cols_B)] for _ in range(filas_A)]
-
-    for i in range(filas_A):
-        for j in range(cols_B):
-            for k in range(cols_A):
-                C[i][j] += A[i][k] * B[k][j]
-    return C
-
-def tiene_ceros(matriz, tolerancia=1e-9):
-    """
-    Verifica si la matriz tiene algún elemento que sea (prácticamente) cero.
-    Usamos tolerancia para evitar errores de punto flotante.
-    """
-    for fila in matriz:
-        for valor in fila:
-            if valor <= tolerancia:
-                return True
-    return False
-
-def isErgodica(matriz, max_potencia=None):
-    """
-    Verifica si una matriz es regular o ergodica elevándola a potencias sucesivas
-    hasta encontrar una matriz sin ceros.
-    """
-    n = len(matriz)
-    
-    # Límite teórico: Si es regular, debería ocurrir antes de n^2 pasos
-    # (Cota de Wielandt: n^2 - 2n + 2). Ponemos un límite de seguridad.
-    if max_potencia is None:
-        max_potencia = n * n + 2
-
-    matriz_actual = matriz # Empezamos con M^1
-    
-    print(f"Probando regularidad para matriz {n}x{n}...")
-
-    for k in range(1, max_potencia + 1):
-        if not tiene_ceros(matriz_actual):
-            print(f"¡Éxito! La matriz es REGULAR en la potencia k={k}.")
-            # Opcional: Mostrar la matriz resultante
-            # for fila in matriz_actual: print([round(x, 4) for x in fila])
-            return True
-        
-        # Multiplicamos por la matriz original para obtener la siguiente potencia
-        # M^(k+1) = M^k * M
-        matriz_actual = multiplicar_matrices(matriz_actual, matriz)
-
-    print(f"No se encontró regularidad hasta la potencia k={max_potencia}.")
-    return False
-
 """
 La distribucion de probabilidad de los simbolos en la fuente en el vector t va variando con la evolucion del proceso de emision de simbolos. 
 El vector estacionario representa la distribucion de probabilidad a largo plazo, es decir, la distribucion a la que tiende el sistema despues de muchas transiciones.
@@ -229,10 +154,7 @@ Inicializo el vector estacionario suponiendo equiprobabilidad
 Itero un numero fijo de veces para aproximar el vector estacionario
 En cada iteracion, calculo un nuevo vector estacionario multiplicando el vector actual por la matriz de transicion
 Actualizo el vector estacionario con el nuevo vector calculado
-Finalmente, devuelvo el vector estacionario aproximado.
-
-# Explicacion:
-para obtener el vector estacionario se inicializo el vector suponiendo equiprobabilidad, itero un numero fijo de veces para aproximar el vector estacionario. Luego, en cada iteración, se calculó un nuevo vector estacionario multiplicando el vector actual por la matriz de transición, actualizo el vector estacionario con el nuevo vector calculado y al finalizar las iteraciones se devuelve el vector estacionario resultante.
+Finalmente, devuelvo el vector estacionario aproximado
 """
 def getVecEstacionarioMat(matriz: list[list[float]]) -> list[float]: 
        # Inicializar vector estacionario suponiendo equiprobabilidad
@@ -262,9 +184,6 @@ Calculo la entropia a partir de una matriz y su vector estacionario
  Si la entrada de la matriz en la posicion (i,j) es diferente de 0, calculo la contribucion a la entropia condicional y la sumo a sum
  Despues de calcular la entropia condicional para la columna j, multiplico sum por el valor correspondiente del vector estacionario y lo sumo a la entropia total
  Finalmente, devuelvo el valor total de la entropia
-
-# Explicacion:
-Se calcula la entropía condicional de cada símbolo recorriendo la matriz por columnas y obteniendo la información correspondiente, luego se afecta la suma de las informaciones por el valor correspondiente del vector estacionario y se suma a la entropía total.
 """
 def calcularEntropiaFuenteMarkov(mat: list[list[float]], vec_est: list[float]) -> float:
     entropia = 0;
@@ -338,14 +257,6 @@ def getMatrizconCad(cadena: str) -> tuple[list[str], list[list[float]]]:
 # Actualizo la matriz en la posicion (i,j) con el numero de transiciones contadas
 # Despues de contar todas las transiciones, divido cada entrada de la matriz por la suma de su columna para obtener las probabilidades
 # Finalmente, devuelvo la matriz de transicion de estados
-
-#Explicacion:
-Luego para obtener la matriz de transiciones inicializo una matriz cuadrada de tamaño n x n en 0, donde n
-es el numero de símbolos en el alfabeto, itero sobre cada par de símbolos (i,j) en el alfabeto contando
-las transiciones de i a j en el mensaje dado. Actualizo la matriz en la posición (i,j) con el numero de
-transiciones contadas para luego dividir cada entrada de la matriz por la suma de su columna para obtener
-las probabilidades. Finalmente se devuelve la matriz de transición de estados.
-
 """
 def getMatriz(alphabet: list[str],msg: str) -> list[list[float]]:
     n = len(alphabet);
@@ -491,22 +402,22 @@ def isUnivoco(codigo: list[str]) -> bool: # Algoritmo de Sardinas-Patterson
   i = 0 # Numero de Iteraciones
   seguir = True
   while seguir:
-    #   print(S[i])
+      print(S[i])
       for x in S[0]: # Siempre comparo con el codigo
           for y in S[i]: # En S[i] se guarda el conjunto el cual debo comparar con S[0]
               if x.startswith(y) and x != y:
                   S[i+1].add(x[len(y):])
-                #   print("Agrego x:", x[len(y):])
-                #   print("x:", x, "y:", y)
+                  print("Agrego x:", x[len(y):])
+                  print("x:", x, "y:", y)
               else:
                   if y.startswith(x) and x != y:
-                    #   print("Agrego y:", y[len(x):])
-                    #   print("x:", x, "y:", y)
+                      print("Agrego y:", y[len(x):])
+                      print("x:", x, "y:", y)
                       S[i+1].add(y[len(x):])
-    #   print("Siguiente conjunto:", S[i+1])
-    #   print("-----")
-    #   print(S)
-    #   print("-----")
+      print("Siguiente conjunto:", S[i+1])
+      print("-----")
+      print(S)
+      print("-----")
       if S[0].intersection(S[i+1]) != set(): # Si la intersección no es vacía, no es unívocamente decodificable
           respuesta = False
           seguir = False
@@ -519,19 +430,7 @@ def isUnivoco(codigo: list[str]) -> bool: # Algoritmo de Sardinas-Patterson
               i += 1
   return respuesta
 
-            
-"""
- Codigo Bloque o singular, NO SON DECODIFICABLES
- Codigo No Singular, SI SON decodificables pero ambiguos, es decir, una misma cadena puede tener mas de una decodificacion posible
- Codigo Univoco, SI SON DECODIFICABLES pero no se pueden decodificar a medida que se reciben los simbolos, hay que obtener la cadena completa
- Codigo Instantaneo, SI SON DECODIFICABLES y ademas se pueden decodificar a medida que se reciben los simbolos
 
-# Explicacion:
-Luego para determinar el tipo del código, en primera instancia se comprueba si el código es no singular iterando sobre la lista de palabras código para ver si hay alguna que se repita. En caso de encontrar una que se repita se deja de iterar y se devuelve false.
-En el caso de que el código sea no singular paso a comprobar si el código es instantáneo ya que, que un código sea instantáneo, es condición suficiente para que sea unívoco. Para determinar si es instantáneo se itera sobre las palabras código mientras no se haya encontrado un prefijo comparando cada palabra código con las demás. Si encuentro que una palabra código es prefijo de otra dejo de iterar y retorno false ya que el código no sera instantáneo.
-Luego en caso de que el código no sea instantáneo es posible que aun sea unívoco. Para comprobar si el código es unívoco se utiliza el algoritmo de Sardinas-Patterson en donde se realiza el siguiente procedmiento:
-
-"""
 def getTipoCodigo(codigo):
     if (not isNoSingular(codigo)): #Si no es no singular => es bloque o singular
         return ("El codigo es de tipo bloque o singular")
@@ -543,6 +442,13 @@ def getTipoCodigo(codigo):
                 return ("El codigo es univoco")
             else:
                 return ("El codigo es no singular")
+            
+"""
+ Codigo Bloque o singular, NO SON DECODIFICABLES
+ Codigo No Singular, SI SON decodificables pero ambiguos, es decir, una misma cadena puede tener mas de una decodificacion posible
+ Codigo Univoco, SI SON DECODIFICABLES pero no se pueden decodificar a medida que se reciben los simbolos, hay que obtener la cadena completa
+ Codigo Instantaneo, SI SON DECODIFICABLES y ademas se pueden decodificar a medida que se reciben los simbolos
+"""
 
 """
  Dada una lista de palabras codigo devuelve el alfabeto codigo
@@ -552,9 +458,6 @@ def getTipoCodigo(codigo):
  Para cada palabra codigo, itero sobre cada simbolo
  Agrego el caracter al conjunto alfabeto
  Finalmente, retorno el conjunto alfabeto
-
-# Explicacion:
-Para obtener el alfabeto código itero sobre cada palabra código en la lista y a su vez para cada palabra código, itero sobre cada símbolo, agrego el caracter al conjunto alfabeto y finalmente, retorno el conjunto alfabeto.
 """
 def getAlfabetoCodigo(codigo: list[str]) -> set[str]: 
     alfabeto = set()
@@ -586,14 +489,11 @@ def getLongitudesPalabrasCod(codigo: list[str]) -> list[int]:
  Itero sobre cada longitud en la lista de longitudes
  Para cada longitud, calculo la contribucion a la suma usando la formula len(alfabeto)^(-longitud) y la sumo a sumatoria
  Finalmente, retorno el valor total de sumatoria
-
-# Explicacion:
-Luego para determinar si el código cumple con la inecuación de Kraft se inicializa un acumulador en cero, y para cada longitud de palabra código se calcula su contribución a la suma usando la formula r^-(Li) y sumándolo al acumulador.
 """
-def getKraft(alfabetoCodigo: set[str], longitud: list[int]) -> float: 
+def getKraft(alfabeto: set[str], longitud: list[int]) -> float: 
     sumatoria = 0
     for i in range(len(longitud)):
-        sumatoria += len(alfabetoCodigo)**(-longitud[i])
+        sumatoria += len(alfabeto)**(-longitud[i])
     return sumatoria # Si esta es <= 1 entonces existe un codigo Instantaneo con estas longitudes
 
 
@@ -607,9 +507,6 @@ def getKraft(alfabetoCodigo: set[str], longitud: list[int]) -> float:
  Itero sobre cada probabilidad en la lista de probabilidades
  Para cada probabilidad, calculo la contribucion a la entropia usando la formula prob*log(1/prob,r) y la sumo a s
  Finalmente, retorno el valor total de s como la entropia del codigo
-
-# Explicacion:
-Para obtener la entropía de un código se inicializa una variable s en 0 para acumular el valor de la entropía, se obtiene el alfabeto código como fue descripto antes, se calcula r como la longitud del alfabeto código. Seguidamente se itera sobre cada probabilidad en la lista de probabilidades calculando su contribución a la entropía usando la formula prob*log(1/prob,r) y sumándola a s. Finalmente, retorno el valor total de s como la entropía del código.
 """
 def getEntropiaCodigoR(codigo: list[str], probabilidad: list[float]) -> float:
     s = 0
@@ -626,10 +523,6 @@ Calculo la longitud media del codigo
  Itero sobre cada par de probabilidad y longitud usando zip
  Para cada par, multiplico la probabilidad por la longitud y las sumo para obtener la longitud media
  Finalmente, retorno el valor total como la longitud media del codigo
-
-# Explicacion:
-Para obtener la longitud media del código primeramente se cuenta la cantidad de símbolos de cada palabra código y se fabrica un vector paralelo en el que se encuentren dichas longitudes. Luego se itera sobre cada par de probabilidad y longitud multiplicando la probabilidad por la longitud acumulándola para obtener la longitud media. Finalmente, retorno el valor total como la longitud media del código.
-
 """
 def getLongitudMedia(palabras_codigo: list[str], probabilidad: list[float]) -> float: 
     return sum([p * l for p, l in zip(probabilidad, getLongitudesPalabrasCod(palabras_codigo))]);
@@ -650,10 +543,6 @@ Obtengo las longitudes de las palabras codigo llamando a la funcion getLongitude
 Itero sobre cada elemento del codigo
 Para cada elemento, verifico si su longitud es mayor que ceil(log(1/probabilidad[i], r))
 Si encuentro alguna longitud que no cumple la condicion, retorno False indicando que no es compacto
-
-# Explicacion:
-se itera sobre cada palabra del codigo verificando si su longitud es mayor que ceil(log(1/probabilidad[i], r)). Es relevante aclarar que teoricamente se deberia comprobar que cada elemento sea igual a log_r(1/Pi), sin embargo en la practica es muy dificil hallar el unico codigo compacto, es por eso que se establecen como compactos todos los elementos que cumplan con la desigualdad Li < techo (log_r(1/Pi)) ampliando asi el conjunto de codigos compactos.
-
 """
 def isCompacto(palabras_codigo: list[str], probabilidad: list[float]) -> bool: 
     if not isInstantaneo(palabras_codigo):

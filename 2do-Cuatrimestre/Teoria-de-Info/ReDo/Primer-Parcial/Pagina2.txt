@@ -1,0 +1,40 @@
+Para obtener el alfabeto código itero sobre cada palabra código en la lista y a su vez para cada palabra código, itero sobre cada símbolo, agrego el caracter al conjunto alfabeto y finalmente, retorno el conjunto alfabeto.
+
+Para obtener la entropía de un código se inicializa una variable s en 0 para acumular el valor de la entropía, se obtiene el alfabeto código como fue descripto antes, se calcula r como la longitud del alfabeto código. Seguidamente se itera sobre cada probabilidad en la lista de probabilidades calculando su contribución a la entropía usando la formula prob*log(1/prob,r) y sumándola a s. Finalmente, retorno el valor total de s como la entropía del código.
+
+Para obtener la longitud media del código primeramente se cuenta la cantidad de símbolos de cada palabra código y se fabrica un vector paralelo en el que se encuentren dichas longitudes. Luego se itera sobre cada par de probabilidad y longitud multiplicando la probabilidad por la longitud acumulándola para obtener la longitud media. Finalmente, retorno el valor total como la longitud media del código.
+
+Luego para determinar si el código cumple con la inecuación de Kraft se inicializa un acumulador en cero, y para cada longitud de palabra código se calcula su contribución a la suma usando la formula r^-(Li) y sumándolo al acumulador.
+
+Luego para determinar el tipo del código, en primera instancia se comprueba si el código es no singular iterando sobre la lista de palabras código para ver si hay alguna que se repita. En caso de encontrar una que se repita se deja de iterar y se devuelve false.
+En el caso de que el código sea no singular paso a comprobar si el código es instantáneo ya que, que un código sea instantáneo, es condición suficiente para que sea unívoco. Para determinar si es instantáneo se itera sobre las palabras código mientras no se haya encontrado un prefijo comparando cada palabra código con las demás. Si encuentro que una palabra código es prefijo de otra dejo de iterar y retorno false ya que el código no sera instantáneo.
+Luego en caso de que el código no sea instantáneo es posible que aun sea unívoco. Para comprobar si el código es unívoco se utiliza el algoritmo de Sardinas-Patterson en donde se realiza el siguiente procedmiento:
+ Inicializo una lista S con dos conjuntos: el primero contiene todas las palabras codigo y el segundo esta vacio
+ Inicializo i en 0 para contar las iteraciones
+ Inicializo una variable seguir en True para controlar el bucle
+ Mientras seguir sea True:
+ Itero sobre cada palabra codigo x en S[0]
+  Itero sobre cada palabra y en S[i]
+   Si X comienza con Y y X no es igual a Y, agrego el sufijo de X en S[i+1]
+   Si Y comienza con X y X no es igual a Y, agrego el sufijo de Y en S[i+1]
+ Despues de comparar todas las palabras:
+ Si la interseccion entre S[0] y S[i+1] no es vacia, el codigo no es univocamente decodificable
+ Si S[i+1] es vacio o ya fue visto antes, el codigo es univocamente decodificable
+ Si no, agrego un nuevo conjunto vacio a S y aumento i en 1 para continuar buscando
+ Finalmente, retorno la respuesta
+
+En este caso al inicializarse el vector de conjuntos quedara compuesto de la siguiente manera:
+[ {'-', '*/', '*', '/+', '+-'}, {}]
+Luego del primer paso quedara compuesto de esta manera:
+[ {'/+', '-', '*', '+-', '*/'}, {'/'} ] . Esto se debe a que el primer sufijo que se encuentra es "/"
+Luego del segundo paso el vector se encuentra formado por:
+[ {'*/', '*', '+-', '-', '/+'} , {'/'} , {'+'} ] . Aqui se encuentra que el sufijo precedido por el prefijo "/' es el sufijo "+"
+En el tercer y ultimo paso:
+[ {'*/', '*', '+-', '-', '/+'} , {'/'} , {'+'} , {'-'} ]. Se agrega el "-" ya que es el sufijo de la palabra codigo "+-" y luego al comprobar que el "-" es una de las palabras codigo se puede afirmar que el codigo no es univoco.
+
+En el caso del segundo codigo tiene sentido comprobar si dicho codigo es compacto, para lo cual se itera sobre cada palabra del codigo
+verificando si su longitud es mayor que ceil(log(1/probabilidad[i], r)). Es relevante aclarar que teoricamente se deberia comprobar que cada elemento sea igual a log_r(1/Pi), sin embargo en la practica es muy dificil hallar el unico codigo compacto, es por eso que se establecen como compactos todos los elementos que cumplan con la desigualdad Li < techo (log_r(1/Pi)) ampliando asi el conjunto de codigos compactos.
+
+
+Conclusiones:
+Es importante notar que los codigos a pesar de tener igual longitud media, igual numero de palabras codigo y mismo resultado de la inecuacion de Kraft, uno es no singular haciendolo inutil para la codificacion y otro es compacto, siendo asi optimo. Estos resultados traen aparejados conclusiones relevantes en donde podemos darnos cuenta que es lo que nos quiere decir la ecuacion de Kraft-Mac Millan: En ambos casos se cumple la desigualdad, ya que esta depende de las longitudes de las palabras codigo y de la cantidad de palabras codigo, sin embargo uno es compacto y otro no evidenciando que la clasificacion del codigo depende de la organizacion de los simbolos del alfabeto codigo, es decir, de las palabras codigo y es independiente de las probabilidades de las mismas.

@@ -1,0 +1,30 @@
+Para obtener el alfabeto y las probabilidades de una fuente a partir de un mensaje se inicializó dos listas vacías: "alfabeto" para almacenar los símbolos únicos y "apariciones" para contar las ocurrencias de cada símbolo. Luego se iteró sobre cada símbolo en la cadena dada. Para cada símbolo se verifico si ya estaba en el alfabeto, si esta, incremento su contador de apariciones en la lista apariciones, si no esta, lo agrego al alfabeto y inicializo su contador en 1. Luego de contar todas las apariciones, calculo las probabilidades dividiendo el numero de apariciones de cada símbolo por la longitud total de la cadena. Finalmente, ordeno el alfabeto y las probabilidades en base al alfabeto para mantener un orden consistente.
+
+Luego para obtener la matriz de transiciones inicializo una matriz cuadrada de tamaño n x n en 0, donde n es el numero de símbolos en el alfabeto, itero sobre cada par de símbolos (i,j) en el alfabeto contando las transiciones de i a j en el mensaje dado. Actualizo la matriz en la posición (i,j) con el numero de transiciones contadas para luego dividir cada entrada de la matriz por la suma de su columna para obtener las probabilidades. Finalmente se devuelve la matriz de transición de estados.
+
+Para determinar si una fuente es de memoria nula se realiza el siguiente procedimiento:
+ * Inicializo una lista maxima_dif para almacenar la maxima diferencia por fila
+ * Itero sobre cada fila de la matriz
+ * Para cada fila, calculo la diferencia entre el maximo y minimo valor
+ * Agrego esta diferencia a la lista maxima_dif
+ * Calculo el valor maximo de las diferencias almacenadas
+ * Si el valor maximo es menor que la tolerancia dada, retorno True indicando que la fuente es de memoria nula
+ * De lo contrario, retorno False indicando que la fuente tiene memoria
+La base de este procedimiento es el criterio de determinar la maxima diferencia por fila para luego preguntar si la maxima diferencia en la matriz es menor a la tolerancia establecida arbitrariamente.
+
+Posteriormente para calcular la entropía se obtiene, en primera instancia, la cantidad de información aportada por cada símbolo de la siguiente manera:
+Se inicializa una lista vacía para almacenar la información de cada símbolo, se itera sobre cada probabilidad en la lista de probabilidades pasada por parámetro y para cada probabilidad, si es mayor a 0, calculo la información usando la formula I = log2(1/P) y la agrego a la lista.
+Luego para calcular la entropía se utiliza este vector que contiene la información por símbolo, se inicializa la variable H en 0 para almacenar la entropía total, se itera sobre cada par de información y probabilidad multiplicando la información por la probabilidad y sumándosela a H para luego devolver el valor total de H.
+
+Luego para obtener la extension de orden N de la fuente se realiza un procedimiento recursivo en el que si n es 1, retorno la fuente y las probabilidades originales, si n es mayor que 1, inicializo dos listas vacías: nueva_fuente y nuevas_probabilidades. Posteriormente llamo recursivamente a la función con n-1 para obtener la extension anterior. Itero sobre cada símbolo en la extension anterior a su vez se itera sobre cada símbolo de la fuente original para crear una combinación concatenando el símbolo de la extension anterior con el símbolo de la fuente original. Luego se calcula la nueva probabilidad multiplicando las probabilidades correspondientes.
+
+En el ejercicio 2 para obtener el vector estacionario se inicializo el vector suponiendo equiprobabilidad, itero un numero fijo de veces para aproximar el vector estacionario. Luego, en cada iteración, se calculó un nuevo vector estacionario multiplicando el vector actual por la matriz de transición, actualizo el vector estacionario con el nuevo vector calculado y al finalizar las iteraciones se devuelve el vector estacionario resultante.
+
+Posteriormente para calcular la entropía de la fuente, al ser una fuente de Markov, el procedimiento fue modificado. 
+Se calcula la entropía condicional de cada símbolo recorriendo la matriz por columnas y obteniendo la información correspondiente, luego se afecta la suma de las informaciones por el valor correspondiente del vector estacionario y se suma a la entropía total.
+
+
+Conclusiones:
+
+Es interesante destacar de este ejercicio como con un mismo alfabeto pero distintos mensajes se pueden llegar a distintas conclusiones de una fuente. En el caso del mensaje 1, se determina que la emisión de un símbolo es completamente independiente de los anteriormente emitidos es decir que no se encuentra ninguna correlación de ningún tipo entre los símbolos presentes en el mensaje. Sin embargo se podría decir que en el ejercicio 2 se encuentran "patrones" que representan a las probabilidades condicionales, luego de emitirse el símbolo "*" nunca se emitirá el símbolo "*" de nuevo o, por ejemplo, luego de emitirse un símbolo "*" hay una probabilidad del 66% que se emita el símbolo "/". Este es el tipo de afirmaciones que se pueden hacer observando las matrices de transición. Tambien en este ejercicio se evidencia como la entropía es independiente de los símbolos pero completamente dependiente de las probabilidades de estos. Tambien se puede ver un relevante aumento en la entropía al momento de realizar la extension de orden 2 del primer ejercicio, esto es sencillamente debido al aumento de símbolos H(Sn) = n*H(S).
+Tambien podemos ver que la entropía de esta fuente de memoria nula es mayor que la entropía de la fuente de Markov, esto es asi ya que las probabilidades condicionales aportan un cierto "orden" que es lo que causa la disminución de la incertidumbre media. Tambien de la matriz de transición podemos ver que la fuente es ergodica, es decir que todos los estados del proceso son alcanzables desde otro estado, esto tiene como consecuencia directa la existencia del único vector estacionario, ya que, el estado de la fuente no dependerá de cual es el primer símbolo que se emite.
